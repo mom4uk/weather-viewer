@@ -1,0 +1,21 @@
+package server
+
+import (
+	"net/http"
+	"os"
+)
+
+type Server struct {
+	mux *http.ServeMux
+}
+
+func NewServer() *Server {
+	return &Server{
+		mux: http.NewServeMux(),
+	}
+}
+
+func (s *Server) Start() error {
+	addr := os.Getenv("SERVER_ADDR")
+	return http.ListenAndServe(addr, s.mux)
+}
