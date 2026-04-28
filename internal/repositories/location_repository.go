@@ -16,7 +16,7 @@ func NewLocationRepository(db *sql.DB) *LocationRepository {
 	}
 }
 func (r *LocationRepository) GetLocation(id int) (domain.Location, error) {
-	query := `SELECT * FROM locations WHERE id = ?`
+	query := `SELECT id, name, user_id, latitude, longitude FROM locations WHERE id = $1`
 
 	var location domain.Location
 	err := r.db.QueryRow(query, id).Scan(

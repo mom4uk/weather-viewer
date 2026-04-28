@@ -3,9 +3,10 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"weather-viewer/internal/apierrors"
+	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
-	"weather-viewer/internal/httputil"
 	"weather-viewer/internal/services"
 )
 
@@ -20,9 +21,15 @@ func NewLocationController(s *services.LocationService) *LocationController {
 }
 
 func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request) {
-	id, err := httputil.GetIdFromUrl(r.URL.Path)
-	if err != nil {
+	idStr := r.PathValue("id")
+	if err := dto.ValidateId(idStr); err != nil {
 		apierrors.HandleError(w, err)
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		apierrors.HandleError(w, domain.ErrInvalidId)
 		return
 	}
 

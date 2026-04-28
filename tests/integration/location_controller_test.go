@@ -36,7 +36,7 @@ func TestSearchLocation_success(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("expected %+v, got %+v", expected, got)
+		t.Fatalf("got: %+v, expected: %+v", got, expected)
 	}
 }
 
@@ -55,9 +55,9 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 	if rr.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d\nbody: %s", rr.Code, rr.Body.String())
 	}
-	var got []domain.ErrorResponse
+	var got domain.ErrorResponse
 	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
-		t.Fatalf("faild to decode response: %v", err)
+		t.Fatalf("decode error: %v\nbody: %s", err, rr.Body.String())
 	}
 
 	expected := domain.ErrorResponse{
@@ -65,7 +65,7 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("expected %+v, got %+v", expected, got)
+		t.Fatalf("got: %+v, expected: %+v", got, expected)
 	}
 }
 
@@ -73,7 +73,7 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 	db := testutils2.NewTestDB()
 	app := testutils2.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodGet, "/searchLocation/1", nil)
+	req, err := http.NewRequest(http.MethodGet, "/searchLocation/244", nil)
 	if err != nil {
 		t.Fatalf("http request error: %s", err)
 	}
@@ -84,9 +84,9 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 	if rr.Code != http.StatusNotFound {
 		t.Fatalf("expected 404, got %d\nbody: %s", rr.Code, rr.Body.String())
 	}
-	var got []domain.ErrorResponse
+	var got domain.ErrorResponse
 	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
-		t.Fatalf("faild to decode response: %v", err)
+		t.Fatalf("decode error: %v\nbody: %s", err, rr.Body.String())
 	}
 
 	expected := domain.ErrorResponse{
@@ -94,6 +94,6 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("expected %+v, got %+v", expected, got)
+		t.Fatalf("got: %+v, expected: %+v", got, expected)
 	}
 }
