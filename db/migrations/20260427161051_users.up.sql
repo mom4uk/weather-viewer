@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    id       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     login    VARCHAR,
     password VARCHAR,
 );
