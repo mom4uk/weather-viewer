@@ -1,6 +1,8 @@
 package seeds
 
-import "weather-viewer/testutils"
+import (
+	"weather-viewer/internal/testutils"
+)
 
 func AddUser(testDb *testutils.TestDB) error {
 	_, err := testDb.DB.Exec(`
