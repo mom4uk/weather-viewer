@@ -6,20 +6,20 @@ import (
 )
 
 type Server struct {
-	mux *http.ServeMux
+	Mux *http.ServeMux
 }
 
 func NewServer() *Server {
 	return &Server{
-		mux: http.NewServeMux(),
+		Mux: http.NewServeMux(),
 	}
 }
 
 func (s *Server) GetMux() *http.ServeMux {
-	return s.mux
+	return s.Mux
 }
 
 func (s *Server) Start() error {
 	addr := os.Getenv("SERVER_ADDR")
-	return http.ListenAndServe(addr, s.mux)
+	return http.ListenAndServe(addr, s.Mux)
 }
