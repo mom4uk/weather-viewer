@@ -15,6 +15,10 @@ func NewServer() *Server {
 	}
 }
 
+func (s *Server) GetMux() *http.ServeMux {
+	return s.mux
+}
+
 func (s *Server) Start() error {
 	addr := os.Getenv("SERVER_ADDR")
 	return http.ListenAndServe(addr, s.mux)
