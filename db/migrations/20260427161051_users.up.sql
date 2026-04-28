@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    id       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    login    VARCHAR,
-    password VARCHAR,
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    login VARCHAR(255),
+    password VARCHAR(255)
 );
