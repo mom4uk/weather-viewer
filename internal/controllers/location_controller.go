@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"weather-viewer/internal/apierrors"
+	"weather-viewer/internal/dto"
 	"weather-viewer/internal/httputil"
+	"weather-viewer/internal/services"
 )
 
 type LocationController struct {
@@ -24,13 +26,20 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	result, err := services.GetLocation(c.locationService, id)
+	result, err := c.locationService.GetLocation(id)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(result); err != nil {
+	response := dto.LocationResponse{
+		ID:        result.ID,
+		Name:      result.Name,
+		UserID:    result.UserID,
+		Latitude:  result.Latitude,
+		Longitude: result.Longitude,
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
 	}
 }

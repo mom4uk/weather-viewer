@@ -4,27 +4,26 @@ import (
 	"log"
 	"weather-viewer/db"
 	"weather-viewer/internal/controllers"
+	"weather-viewer/internal/repositories"
+	"weather-viewer/internal/services"
 	"weather-viewer/server"
 )
 
 func main() {
-	db, err := db.InitDB()
-	if err != nil {
-		panic(err)
-	}
+	database := db.InitDB()
 
 	srv := server.NewServer()
 
-	userController := controllers.NewUserController()
-	locationController := controllers.NewLocationController()
+	//userRepository := repositories.NewUserRepository(db)
+	locationRepository := repositories.NewLocationRepository(database)
 
-	userService := services.NewUserService(userController)
-	locationService := services.NewLocationService(locationController)
+	//userService := services.NewUserService(userRepository)
+	locationService := services.NewLocationService(locationRepository)
 
-	userRepository := repositories.NewUserRepository(db)
-	locationRepository := repositories.NewLocationRepository(db)
+	//userController := controllers.NewUserController()
+	locationController := controllers.NewLocationController(locationService)
 
-	controllers.RegisterUserRoutes(srv.GetMux(), userController)
+	//controllers.RegisterUserRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController)
 
 	if err := srv.Start(); err != nil {

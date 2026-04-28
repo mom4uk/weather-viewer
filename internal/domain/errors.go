@@ -7,5 +7,6 @@ type ErrorResponse struct {
 }
 
 var (
-	ErrIncorrectId = errors.New("incorrect id for location")
+	ErrIncorrectId       = errors.New("incorrect id for location")
+	ErrIncorrectNotFound = errors.New("location not found")
 )

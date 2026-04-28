@@ -1,9 +1,9 @@
 package domain
 
-type LocationResponse struct {
-	ID        int     `json:"id"`
-	Name      string  `json:"name"`
-	UserID    int     `json:"user_id"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+type Location struct {
+	ID        int
+	Name      string
+	UserID    int
+	Latitude  float64
+	Longitude float64
 }

@@ -1,9 +1,9 @@
 package dto
 
-type Location struct {
+type LocationResponse struct {
 	ID        int
 	Name      string
-	UserId    int
+	UserID    int
 	Latitude  float64
 	Longitude float64
 }
