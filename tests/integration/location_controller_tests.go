@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 	"weather-viewer/internal/domain"
+	testutils2 "weather-viewer/internal/testutils"
 	"weather-viewer/tests/seeds"
-	"weather-viewer/testutils"
 )
 
 func TestSearchLocation_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	db := testutils2.NewTestDB()
+	app := testutils2.NewTestApp(db)
 
 	if err := seeds.AddUser(db); err != nil {
 		t.Fatalf("data seed error %s", err)
@@ -22,7 +22,8 @@ func TestSearchLocation_success(t *testing.T) {
 	if err := seeds.AddLocations(db); err != nil {
 		t.Fatalf("data seed error %s", err)
 	}
-	req, err := http.NewRequest(http.MethodGet, "/searchLocation", nil)
+
+	req, err := http.NewRequest(http.MethodGet, "/searchLocation/1", nil)
 	if err != nil {
 		t.Fatalf("http request error: %s", err)
 	}
@@ -37,10 +38,40 @@ func TestSearchLocation_success(t *testing.T) {
 	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
 		t.Fatalf("faild to decode response: %v", err)
 	}
-	expected := []domain.LocationResponse{
-		{Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0},
-		{Name: "Санкт-Петербург", UserID: 1, Latitude: 1, Longitude: 1},
+
+	expected := domain.LocationResponse{
+		ID: 1, Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0,
 	}
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Fatalf("expected %+v, got %+v", expected, got)
+	}
+}
+
+func TestSearchLocation_error_incorrectId(t *testing.T) {
+	db := testutils2.NewTestDB()
+	app := testutils2.NewTestApp(db)
+
+	req, err := http.NewRequest(http.MethodGet, "/searchLocation/aaa", nil)
+	if err != nil {
+		t.Fatalf("http request error: %s", err)
+	}
+	rr := httptest.NewRecorder()
+
+	app.Server.Mux.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d\nbody: %s", rr.Code, rr.Body.String())
+	}
+	var got []domain.LocationResponse
+	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
+		t.Fatalf("faild to decode response: %v", err)
+	}
+
+	expected := domain.ErrorResponse{
+		Message: "Некорректное значение в id",
+	}
+
 	if !reflect.DeepEqual(got, expected) {
 		t.Fatalf("expected %+v, got %+v", expected, got)
 	}
