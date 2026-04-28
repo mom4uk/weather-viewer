@@ -2,14 +2,14 @@ package services
 
 import (
 	"weather-viewer/internal/domain"
-	"weather-viewer/internal/repositories"
+	"weather-viewer/internal/ports"
 )
 
 type LocationService struct {
-	locationRepository *repositories.LocationRepository
+	locationRepository ports.LocationRepository
 }
 
-func NewLocationService(locationRepository *repositories.LocationRepository) *LocationService {
+func NewLocationService(locationRepository ports.LocationRepository) *LocationService {
 	return &LocationService{
 		locationRepository: locationRepository,
 	}
