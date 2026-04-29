@@ -99,3 +99,7 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
 	}
 }
+
+func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request) {
+
+}

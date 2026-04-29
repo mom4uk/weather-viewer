@@ -1,0 +1,33 @@
+package repositories
+
+import (
+	"database/sql"
+	"errors"
+	"weather-viewer/internal/domain"
+)
+
+type SessionRepository struct {
+	db *sql.DB
+}
+
+func NewSessionRepository(db *sql.DB) *SessionRepository {
+	return &SessionRepository{
+		db: db,
+	}
+}
+
+func (s *SessionRepository) GetSession(id string) (domain.Session, error) {
+	query := `SELECT id, user_id, expires_at FROM sessions WHERE session_id = $1`
+
+	var session domain.Session
+
+	err := s.db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.ExpiresAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Session{}, domain.ErrSessionNotFound
+		}
+		return domain.Session{}, err
+	}
+
+	return session, nil
+}
