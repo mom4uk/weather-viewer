@@ -6,6 +6,8 @@ CREATE TABLE locations
     latitude DECIMAL,
     longitude DECIMAL,
 
+    UNIQUE (user_id, name),
+    
     CONSTRAINT fk_locations_users
         FOREIGN KEY (user_id)
             REFERENCES users(id)
