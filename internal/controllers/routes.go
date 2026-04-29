@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"weather-viewer/internal/middlewares"
 )
 
 //func RegisterUserRoutes(mux *http.ServeMux, c *UserController) {
@@ -11,8 +12,14 @@ import (
 //}
 
 func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController) {
-	mux.HandleFunc("GET /searchLocation/{id}", c.GetLocation)
-	//mux.Handle("POST /addLocation", middlewares.JSON(http.HandlerFunc(c.AddLocation)))
+	mux.Handle(
+		"GET /searchLocation/{id}",
+		middlewares.JSON(http.HandlerFunc(c.GetLocation)),
+	)
+	mux.Handle(
+		"POST /addLocation",
+		middlewares.JSON(http.HandlerFunc(c.AddLocation)),
+	)
 	//mux.Handle("GET /getLocations", middlewares.JSON(http.HandlerFunc(c.GetLocations)))
 	//mux.Handle("DELETE /removeLocation", middlewares.JSON(http.HandlerFunc(c.RemoveLocation)))
 }

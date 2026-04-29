@@ -3,6 +3,8 @@ package repositories
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"weather-viewer/internal/domain"
 )
 
@@ -33,5 +35,25 @@ func (r *LocationRepository) GetLocation(id int) (domain.Location, error) {
 		return domain.Location{}, err
 	}
 
+	return location, nil
+}
+
+func (r *LocationRepository) AddLocation(location domain.Location) (domain.Location, error) {
+	query := `INSERT INTO locations (name, user_id, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id`
+
+	err := r.db.QueryRow(
+		query,
+		location.Name,
+		location.UserID,
+		location.Latitude,
+		location.Longitude,
+	).Scan(&location.ID)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return domain.Location{}, domain.ErrLocationAlreadyExists
+		}
+		return domain.Location{}, err
+	}
+	fmt.Print("test")
 	return location, nil
 }

@@ -18,3 +18,7 @@ func NewLocationService(locationRepository ports.LocationRepository) *LocationSe
 func (s *LocationService) GetLocation(id int) (domain.Location, error) {
 	return s.locationRepository.GetLocation(id)
 }
+
+func (s *LocationService) AddLocation(location domain.Location) (domain.Location, error) {
+	return s.locationRepository.AddLocation(location)
+}

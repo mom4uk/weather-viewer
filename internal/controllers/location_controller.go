@@ -50,3 +50,52 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
 	}
 }
+
+func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request) {
+	// userId будет получатся, как я понимаю, через сессии, не забудь переделать
+	userId, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		apierrors.HandleError(w, domain.ErrInvalidId)
+		return
+	}
+	lat, err := strconv.ParseFloat(r.FormValue("latitude"), 64)
+	if err != nil {
+		apierrors.HandleError(w, domain.ErrInvalidLatitude)
+		return
+	}
+
+	lon, err := strconv.ParseFloat(r.FormValue("longitude"), 64)
+	if err != nil {
+		apierrors.HandleError(w, domain.ErrInvalidLongitude)
+		return
+	}
+
+	if err := dto.ValidateName(r.FormValue("name")); err != nil {
+		apierrors.HandleError(w, err)
+		return
+	}
+
+	result, err := c.locationService.AddLocation(domain.Location{
+		Name:      r.FormValue("name"),
+		UserID:    userId,
+		Latitude:  lat,
+		Longitude: lon,
+	})
+	if err != nil {
+		apierrors.HandleError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	response := dto.LocationResponse{
+		ID:        result.ID,
+		Name:      result.Name,
+		UserID:    result.UserID,
+		Latitude:  result.Latitude,
+		Longitude: result.Longitude,
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
+	}
+}
