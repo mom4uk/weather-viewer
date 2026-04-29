@@ -3,7 +3,6 @@ package integration
 import (
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 	"weather-viewer/internal/domain"
@@ -19,11 +18,13 @@ func TestSearchLocation_success(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodGet, "/searchLocation/1", nil)
-	require.NoError(t, err)
-	rr := httptest.NewRecorder()
-
-	app.Server.Mux.ServeHTTP(rr, req)
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/searchLocation/1",
+		nil,
+	)
 
 	testutils.AssertStatus(t, rr, http.StatusOK)
 
@@ -41,12 +42,13 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodGet, "/searchLocation/aaa", nil)
-	require.NoError(t, err)
-
-	rr := httptest.NewRecorder()
-
-	app.Server.Mux.ServeHTTP(rr, req)
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/searchLocation/aaa",
+		nil,
+	)
 
 	testutils.AssertStatus(t, rr, http.StatusBadRequest)
 
@@ -64,12 +66,13 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodGet, "/searchLocation/244", nil)
-	require.NoError(t, err)
-
-	rr := httptest.NewRecorder()
-
-	app.Server.Mux.ServeHTTP(rr, req)
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/searchLocation/244",
+		nil,
+	)
 
 	testutils.AssertStatus(t, rr, http.StatusNotFound)
 
@@ -89,14 +92,13 @@ func TestAddLocation_success(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodPost, "/addLocation", strings.NewReader("name=Тверь&id=1&latitude=3&longitude=4"))
-	require.NoError(t, err)
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr := httptest.NewRecorder()
-
-	app.Server.Mux.ServeHTTP(rr, req)
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/addLocation",
+		strings.NewReader("name=Тверь&id=1&latitude=3&longitude=4"),
+	)
 
 	testutils.AssertStatus(t, rr, http.StatusCreated)
 
@@ -154,14 +156,13 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest(http.MethodPost, "/addLocation", strings.NewReader(tt.input))
-			require.NoError(t, err)
-
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-			rr := httptest.NewRecorder()
-
-			app.Server.Mux.ServeHTTP(rr, req)
+			rr := testutils.PerformRequest(
+				t,
+				app,
+				http.MethodPost,
+				"/addLocation",
+				strings.NewReader(tt.input),
+			)
 
 			testutils.AssertStatus(t, rr, http.StatusBadRequest)
 
@@ -181,14 +182,13 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
-	req, err := http.NewRequest(http.MethodPost, "/addLocation", strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"))
-	require.NoError(t, err)
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	rr := httptest.NewRecorder()
-
-	app.Server.Mux.ServeHTTP(rr, req)
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/addLocation",
+		strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"),
+	)
 
 	testutils.AssertStatus(t, rr, http.StatusConflict)
 	var got domain.ErrorResponse
