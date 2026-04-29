@@ -2,7 +2,7 @@ CREATE TABLE users
 (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     login VARCHAR(255),
-    password VARCHAR(255)
+    password VARCHAR(255),
 
     UNIQUE (login)
 );
