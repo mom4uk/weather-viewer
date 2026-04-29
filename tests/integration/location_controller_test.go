@@ -18,6 +18,15 @@ func TestSearchLocation_success(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
 
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
 	rr := testutils.PerformRequest(
 		t,
 		app,
@@ -181,6 +190,15 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
 
 	rr := testutils.PerformRequest(
 		t,
