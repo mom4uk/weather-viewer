@@ -7,14 +7,18 @@ import (
 	"weather-viewer/internal/services"
 )
 
-func JSON(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
+type Middleware func(http.Handler) http.Handler
+
+func JSON() Middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
-func Auth(s *services.SessionService) func(handler http.Handler) http.Handler {
+func Auth(s *services.SessionService) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("session_token")
@@ -32,5 +36,14 @@ func Auth(s *services.SessionService) func(handler http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), "user_id", userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
+	}
+}
+
+func Chain(mw ...Middleware) Middleware {
+	return func(final http.Handler) http.Handler {
+		for i := len(mw) - 1; i >= 0; i-- {
+			final = mw[i](final)
+		}
+		return final
 	}
 }
