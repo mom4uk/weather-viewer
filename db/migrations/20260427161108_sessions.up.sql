@@ -1,6 +1,6 @@
 CREATE TABLE sessions
 (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id UUID PRIMARY KEY,
     user_id INTEGER,
     expires_at TIMESTAMP,
 
