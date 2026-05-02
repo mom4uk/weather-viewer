@@ -14,7 +14,7 @@ import (
 
 func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController, s *services.SessionService) {
 	mux.Handle(
-		"/searchLocation/{id}",
+		"GET /searchLocation/{id}",
 		middlewares.Chain(
 			middlewares.Auth(s),
 			middlewares.JSON(),
