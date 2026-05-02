@@ -17,7 +17,7 @@ func AssertStatus(t *testing.T, rr *httptest.ResponseRecorder, code int) {
 	}
 }
 
-func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Reader, sessionID string) *httptest.ResponseRecorder {
+func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Reader, sessionToken string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	req, err := http.NewRequest(method, path, body)
@@ -26,7 +26,7 @@ func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Rea
 	const SessionCookieName = "session_token"
 	req.AddCookie(&http.Cookie{
 		Name:  SessionCookieName,
-		Value: sessionID,
+		Value: sessionToken,
 	})
 
 	if body != nil {

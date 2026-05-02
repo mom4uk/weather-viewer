@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"weather-viewer/internal/domain"
 )
@@ -30,7 +31,7 @@ func (r *LocationRepository) GetLocation(id int) (domain.Location, error) {
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Location{}, domain.ErrIncorrectNotFound
+			return domain.Location{}, domain.ErrLocationNotFound
 		}
 		return domain.Location{}, err
 	}
@@ -54,6 +55,45 @@ func (r *LocationRepository) AddLocation(location domain.Location) (domain.Locat
 		}
 		return domain.Location{}, err
 	}
-	fmt.Print("test")
+
 	return location, nil
+}
+
+func (r *LocationRepository) GetLocations(userID int) ([]domain.Location, error) {
+	queryForLocations := `SELECT id, name, user_id, latitude, longitude FROM locations WHERE user_id = $1`
+
+	var result []domain.Location
+
+	rows, err := r.db.Query(queryForLocations, userID)
+	if err != nil {
+		return result, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("rows close error: %v", err)
+		}
+	}()
+
+	for rows.Next() {
+		var location domain.Location
+		err := rows.Scan(
+			&location.ID,
+			&location.Name,
+			&location.UserID,
+			&location.Latitude,
+			&location.Longitude,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, location)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	fmt.Print(result)
+	return result, nil
 }

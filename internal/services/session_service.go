@@ -15,6 +15,6 @@ func NewSessionService(repo *repositories.SessionRepository) *SessionService {
 	}
 }
 
-func (s *SessionService) Authenticate(id string) (domain.Session, error) {
+func (s *SessionService) GetSession(id string) (domain.Session, error) {
 	return s.repo.GetSession(id)
 }

@@ -27,13 +27,13 @@ func Auth(s *services.SessionService) Middleware {
 				return
 			}
 
-			userID, err := s.Authenticate(cookie.Value)
+			session, err := s.GetSession(cookie.Value)
 			if err != nil {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "user_id", userID)
+			ctx := context.WithValue(r.Context(), "session", session)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

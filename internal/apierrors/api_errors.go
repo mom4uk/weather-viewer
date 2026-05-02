@@ -21,7 +21,7 @@ func HandleError(w http.ResponseWriter, err error) {
 	case errors.Is(err, domain.ErrInvalidId):
 		WriteError(w, "Некорректное значение в id", http.StatusBadRequest)
 		return
-	case errors.Is(err, domain.ErrIncorrectNotFound):
+	case errors.Is(err, domain.ErrLocationNotFound):
 		WriteError(w, "Данная локация не найдена", http.StatusNotFound)
 		return
 	case errors.Is(err, domain.ErrInvalidName):
@@ -35,6 +35,9 @@ func HandleError(w http.ResponseWriter, err error) {
 		return
 	case errors.Is(err, domain.ErrLocationAlreadyExists):
 		WriteError(w, "Такая локация уже существует", http.StatusConflict)
+		return
+	case errors.Is(err, domain.ErrUserNotFound):
+		WriteError(w, "Пользователь не найден", http.StatusConflict)
 		return
 	default:
 		WriteError(w, err.Error(), http.StatusInternalServerError)

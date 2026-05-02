@@ -21,6 +21,7 @@ func NewLocationController(s *services.LocationService) *LocationController {
 }
 
 func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request) {
+	// userId будет получатся, как я понимаю, через сессии, не забудь переделать
 	idStr := r.PathValue("id")
 	if err := dto.ValidateId(idStr); err != nil {
 		apierrors.HandleError(w, err)
@@ -58,6 +59,7 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 		apierrors.HandleError(w, domain.ErrInvalidId)
 		return
 	}
+
 	lat, err := strconv.ParseFloat(r.FormValue("latitude"), 64)
 	if err != nil {
 		apierrors.HandleError(w, domain.ErrInvalidLatitude)
@@ -101,5 +103,32 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request) {
+	val := r.Context().Value("session")
+	session, ok := val.(domain.Session)
+	if !ok {
+		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
+	result, err := c.locationService.GetLocations(session.UserID)
+	if err != nil {
+		apierrors.HandleError(w, err)
+		return
+	}
+
+	var response []dto.LocationResponse
+
+	for _, location := range result {
+		response = append(response, dto.LocationResponse{
+			ID:        location.ID,
+			Name:      location.Name,
+			UserID:    location.UserID,
+			Latitude:  location.Latitude,
+			Longitude: location.Longitude,
+		})
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
+	}
 }

@@ -307,4 +307,39 @@ func TestAuth_error_absenceOfSessionId(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
-// POST /addLocation
+// GET /getLocations
+
+func TestGetLocations_success(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/getLocations",
+		nil,
+		sessionID,
+	)
+
+	testutils.AssertStatus(t, rr, http.StatusOK)
+
+	var got []dto.LocationResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	expected := []dto.LocationResponse{
+		{ID: 1, Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0},
+		{ID: 2, Name: "Санкт-Петербург", UserID: 1, Latitude: 1, Longitude: 1},
+	}
+
+	assert.Equal(t, expected, got)
+}
