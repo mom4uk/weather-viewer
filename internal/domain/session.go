@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Session struct {
-	ID        int
+	ID        string
 	UserID    int
 	ExpiresAt time.Time
 }

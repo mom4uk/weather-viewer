@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"weather-viewer/internal/domain"
 )
 
@@ -17,12 +18,13 @@ func NewSessionRepository(db *sql.DB) *SessionRepository {
 }
 
 func (s *SessionRepository) GetSession(id string) (domain.Session, error) {
-	query := `SELECT id, user_id, expires_at FROM sessions WHERE session_id = $1`
+	query := `SELECT id, user_id, expires_at FROM sessions WHERE id = $1`
 
 	var session domain.Session
 
 	err := s.db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.ExpiresAt)
 	if err != nil {
+		fmt.Print(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Session{}, domain.ErrSessionNotFound
 		}

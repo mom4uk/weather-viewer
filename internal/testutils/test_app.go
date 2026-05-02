@@ -16,15 +16,17 @@ func NewTestApp(db *TestDB) *TestApp {
 	srv := server.NewServer()
 
 	locationRepository := repositories.NewLocationRepository(db.DB)
+	sessionRepository := repositories.NewSessionRepository(db.DB)
 
 	//userService := services.NewUserService(userRepository)
 	locationService := services.NewLocationService(locationRepository)
+	sessionService := services.NewSessionService(sessionRepository)
 
 	//userController := controllers.NewUserController()
 	locationController := controllers.NewLocationController(locationService)
 
 	//controllers.RegisterUserRoutes(srv.GetMux(), userController)
-	controllers.RegisterLocationRoutes(srv.GetMux(), locationController)
+	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 	return &TestApp{
 		DB:     db,
 		Server: srv,

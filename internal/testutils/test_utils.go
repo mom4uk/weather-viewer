@@ -17,11 +17,17 @@ func AssertStatus(t *testing.T, rr *httptest.ResponseRecorder, code int) {
 	}
 }
 
-func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Reader) *httptest.ResponseRecorder {
+func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Reader, sessionID string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	req, err := http.NewRequest(method, path, body)
 	require.NoError(t, err)
+
+	const SessionCookieName = "session_token"
+	req.AddCookie(&http.Cookie{
+		Name:  SessionCookieName,
+		Value: sessionID,
+	})
 
 	if body != nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const sessionID = "550e8400-e29b-41d4-a716-446655440000"
+
 // GET /searchLocation/{id}
 func TestSearchLocation_success(t *testing.T) {
 	db := testutils.NewTestDB()
@@ -24,6 +26,9 @@ func TestSearchLocation_success(t *testing.T) {
 	err = testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+
 	err = testutils.SeedLocations(db.DB)
 	require.NoError(t, err, "seed locations error")
 
@@ -33,6 +38,7 @@ func TestSearchLocation_success(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/1",
 		nil,
+		sessionID,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusOK)
@@ -57,6 +63,7 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/aaa",
 		nil,
+		sessionID,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusBadRequest)
@@ -81,6 +88,7 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/244",
 		nil,
+		sessionID,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusNotFound)
@@ -107,6 +115,7 @@ func TestAddLocation_success(t *testing.T) {
 		http.MethodPost,
 		"/addLocation",
 		strings.NewReader("name=Тверь&id=1&latitude=3&longitude=4"),
+		sessionID,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusCreated)
@@ -171,6 +180,7 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 				http.MethodPost,
 				"/addLocation",
 				strings.NewReader(tt.input),
+				sessionID,
 			)
 
 			testutils.AssertStatus(t, rr, http.StatusBadRequest)
@@ -197,6 +207,9 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 	err = testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+
 	err = testutils.SeedLocations(db.DB)
 	require.NoError(t, err, "seed locations error")
 
@@ -206,6 +219,7 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 		http.MethodPost,
 		"/addLocation",
 		strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"),
+		sessionID,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusConflict)
@@ -218,3 +232,42 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 
 	assert.Equal(t, expected, got)
 }
+
+// Auth test
+func TestAuth_error_absenceOfSessionId(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/addLocation",
+		strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"),
+		"test-session",
+	)
+
+	testutils.AssertStatus(t, rr, http.StatusUnauthorized)
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	expected := domain.ErrorResponse{
+		Message: "Unauthorized",
+	}
+
+	assert.Equal(t, expected, got)
+}
+
+// POST /addLocation
