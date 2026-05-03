@@ -77,11 +77,10 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 		login   string
 		message string
 	}{
-		{"Dots are not allowed", "login=testTest.", invalidLoginMessage},
-		{"Special chars are not allowed", "login=2*()_-?!test", invalidLoginMessage},
-		{"Empty login is not allowed", "login=", loginInvalidLengthMessage},
-		{"Login over 20 simbols are not allowed", "login=loginLength21simbolss", loginInvalidLengthMessage},
-		{"Login less than 6 simbols are not allowed", "login=less", loginInvalidLengthMessage},
+		{"Dots are not allowed", "login=testTest.&password=password", invalidLoginMessage},
+		{"Special chars are not allowed", "login=2*()_-?!test&password=password", invalidLoginMessage},
+		{"Login over 20 simbols are not allowed", "login=loginLength21simbolss&password=password", loginInvalidLengthMessage},
+		{"Login less than 6 simbols are not allowed", "login=less&password=password", loginInvalidLengthMessage},
 	}
 
 	for _, tt := range testData {
@@ -129,7 +128,7 @@ func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/auth/register",
-		strings.NewReader("login=test1234"),
+		strings.NewReader("login=test1234&password=password"),
 		"",
 	)
 
@@ -154,7 +153,6 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 		message string
 	}{
 
-		{"Empty password is not allowed", "login=test1111&password=", errorMessage},
 		{"Password over 20 simbols are not allowed", "login=test1111&password=passwoLength21simbols", errorMessage},
 		{"Password less than 6 simbols are not allowed", "login=test1111&password=5char", errorMessage},
 	}
@@ -198,7 +196,9 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 		message string
 	}{
 
-		{"Empty password is not allowed", "", errorMessage},
+		{"Absence of login and password is not allowed", "", errorMessage},
+		{"Empty password is not allowed", "login=test1234&password=", errorMessage},
+		{"Empty login is not allowed", "login=&password=test1234", errorMessage},
 		{"Password over 20 simbols are not allowed", "login=loginLength20simbols", errorMessage},
 		{"Password less than 6 simbols are not allowed", "password=loginLength20simbols", errorMessage},
 	}
