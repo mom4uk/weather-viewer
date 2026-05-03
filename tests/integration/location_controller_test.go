@@ -383,6 +383,7 @@ func TestRemoveLocation_success(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
+// можно накинуть проверок через test table
 func TestRemoveLocation_error_invalidId(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestApp(db)
