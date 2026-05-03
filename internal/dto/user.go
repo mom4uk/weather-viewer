@@ -21,6 +21,10 @@ type UserResponse struct {
 }
 
 func ValidateCredentials(login string, password string) error {
+	if login == "" || password == "" {
+		return domain.ErrAbsenceOfLoginPass
+	}
+
 	var loginRule = regexp.MustCompile(`^[A-Za-z0-9]+$`)
 	if utf8.RuneCountInString(login) < 6 || utf8.RuneCountInString(login) > 20 {
 		return domain.ErrLoginInvalidLength
