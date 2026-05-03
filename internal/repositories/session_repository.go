@@ -33,3 +33,14 @@ func (s *SessionRepository) GetSession(id string) (domain.Session, error) {
 
 	return session, nil
 }
+
+func (s *SessionRepository) CreateSession(session domain.Session) error {
+	query := `INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, $3)`
+	_, err := s.db.Exec(
+		query,
+		session.ID,
+		session.UserID,
+		session.ExpiresAt,
+	)
+	return err
+}

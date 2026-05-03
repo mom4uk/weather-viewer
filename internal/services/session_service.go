@@ -18,3 +18,7 @@ func NewSessionService(repo *repositories.SessionRepository) *SessionService {
 func (s *SessionService) GetSession(id string) (domain.Session, error) {
 	return s.repo.GetSession(id)
 }
+
+func (s *SessionService) CreateSession(session domain.Session) error {
+	return s.repo.CreateSession(session)
+}
