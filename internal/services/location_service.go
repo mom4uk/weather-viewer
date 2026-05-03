@@ -26,3 +26,7 @@ func (s *LocationService) AddLocation(location domain.Location) (domain.Location
 func (s *LocationService) GetLocations(userID int) ([]domain.Location, error) {
 	return s.locationRepository.GetLocations(userID)
 }
+
+func (s *LocationService) RemoveLocation(id int) error {
+	return s.locationRepository.RemoveLocation(id)
+}

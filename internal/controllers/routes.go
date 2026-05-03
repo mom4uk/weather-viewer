@@ -34,5 +34,10 @@ func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController, s *servic
 			middlewares.JSON(),
 		)(http.HandlerFunc(c.GetLocations)),
 	)
-	//mux.Handle("DELETE /removeLocation", middlewares.JSON(http.HandlerFunc(c.RemoveLocation)))
+	mux.Handle("DELETE /removeLocation/{id}",
+		middlewares.Chain(
+			middlewares.Auth(s),
+			middlewares.JSON(),
+		)(http.HandlerFunc(c.RemoveLocation)),
+	)
 }

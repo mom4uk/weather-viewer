@@ -97,3 +97,13 @@ func (r *LocationRepository) GetLocations(userID int) ([]domain.Location, error)
 	fmt.Print(result)
 	return result, nil
 }
+
+func (r *LocationRepository) RemoveLocation(id int) error {
+	query := `DELETE FROM locations WHERE id = $1`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

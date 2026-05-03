@@ -343,3 +343,82 @@ func TestGetLocations_success(t *testing.T) {
 
 	assert.Equal(t, expected, got)
 }
+
+// DELETE /removeLocation/{id}
+
+func TestRemoveLocation_success(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodDelete,
+		"/removeLocation/1",
+		nil,
+		sessionID,
+	)
+	testutils.AssertStatus(t, rr, http.StatusNoContent)
+
+	rr = testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/searchLocation/1",
+		nil,
+		sessionID,
+	)
+
+	testutils.AssertStatus(t, rr, http.StatusNotFound)
+
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	expected := domain.ErrorResponse{
+		Message: "Данная локация не найдена",
+	}
+
+	assert.Equal(t, expected, got)
+}
+
+func TestRemoveLocation_error_invalidId(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodDelete,
+		"/removeLocation/1a4",
+		nil,
+		sessionID,
+	)
+	testutils.AssertStatus(t, rr, http.StatusBadRequest)
+
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	expected := domain.ErrorResponse{
+		Message: "Некорректное значение в id",
+	}
+
+	assert.Equal(t, expected, got)
+}

@@ -21,7 +21,6 @@ func NewLocationController(s *services.LocationService) *LocationController {
 }
 
 func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request) {
-	// userId будет получатся, как я понимаю, через сессии, не забудь переделать
 	idStr := r.PathValue("id")
 	if err := dto.ValidateId(idStr); err != nil {
 		apierrors.HandleError(w, err)
@@ -129,6 +128,28 @@ func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
+		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
+	}
+}
+
+func (c *LocationController) RemoveLocation(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		apierrors.WriteError(w, "Parse form error", http.StatusBadRequest)
+		return
+	}
+	locationIDStr := r.PathValue("id")
+	locationID, err := strconv.Atoi(locationIDStr)
+	if err != nil {
+		apierrors.HandleError(w, domain.ErrInvalidId)
+		return
+	}
+	if err = c.locationService.RemoveLocation(locationID); err != nil {
+		apierrors.HandleError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+
+	if err := json.NewEncoder(w).Encode(nil); err != nil {
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
 	}
 }
