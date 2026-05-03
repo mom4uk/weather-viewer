@@ -3,7 +3,6 @@ package repositories
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 	"weather-viewer/internal/domain"
@@ -94,7 +93,7 @@ func (r *LocationRepository) GetLocations(userID int) ([]domain.Location, error)
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	fmt.Print(result)
+
 	return result, nil
 }
 
