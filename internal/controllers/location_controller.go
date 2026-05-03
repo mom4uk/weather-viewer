@@ -133,10 +133,6 @@ func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request
 }
 
 func (c *LocationController) RemoveLocation(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		apierrors.WriteError(w, "Parse form error", http.StatusBadRequest)
-		return
-	}
 	locationIDStr := r.PathValue("id")
 	locationID, err := strconv.Atoi(locationIDStr)
 	if err != nil {
