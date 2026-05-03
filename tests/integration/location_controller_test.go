@@ -164,7 +164,6 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 	app := testutils.NewTestApp(db)
 
 	nameMessage := "Некорректное значение в name"
-	idMessage := "Некорректное значение в id"
 	latitudeMessage := "Некорректное значение в latitude"
 	longitudeMessage := "Некорректное значение в longitude"
 
@@ -173,30 +172,24 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 		input   string
 		message string
 	}{
-		{"empty name", "name=&id=1&latitude=3&longitude=4", nameMessage},
-		{"name with spaces for name", "name=  &id=1&latitude=3&longitude=4", nameMessage},
-		{"name with special char for name", "name=...&id=1&latitude=3&longitude=4", nameMessage},
-		{"name with special char for name", "name=!?л?&id=1&latitude=3&longitude=4", nameMessage},
-		{"name with special char for name", "name=^^k^&id=1&latitude=3&longitude=4", nameMessage},
-		{"name with numbers for name", "name=1234d5&id=1&latitude=3&longitude=4", nameMessage},
+		{"empty name", "name=&latitude=3&longitude=4", nameMessage},
+		{"name with spaces for name", "name=  &latitude=3&longitude=4", nameMessage},
+		{"name with special char for name", "name=...&latitude=3&longitude=4", nameMessage},
+		{"name with special char for name", "name=!?л?&latitude=3&longitude=4", nameMessage},
+		{"name with special char for name", "name=^^k^&latitude=3&longitude=4", nameMessage},
+		{"name with numbers for name", "name=1234d5&latitude=3&longitude=4", nameMessage},
 
-		{"empty id", "name=Тверь&id=&latitude=3&longitude=4", idMessage},
-		{"id with spaces", "name=Тверь&id= &latitude=3&longitude=4", idMessage},
-		{"id with cyrillic char", "name=Тверь&id=тест&latitude=3&longitude=4", idMessage},
-		{"id with special char", "name=Тверь&id=**3*&latitude=3&longitude=4", idMessage},
-		{"id with english char", "name=Тверь&id=test1&latitude=3&longitude=4", idMessage},
+		{"empty latitude", "name=Тверь&latitude=&longitude=4", latitudeMessage},
+		{"latitude with spaces", "name=Тверь&latitude=   &longitude=4", latitudeMessage},
+		{"latitude with cyrillic char", "name=Тверь&latitude=лво12&longitude=4", latitudeMessage},
+		{"latitude with special char", "name=Тверь&latitude=:3:&longitude=4", latitudeMessage},
+		{"latitude with english char", "name=Тверь&latitude=abc2&longitude=4", latitudeMessage},
 
-		{"empty latitude", "name=Тверь&id=1&latitude=&longitude=4", latitudeMessage},
-		{"latitude with spaces", "name=Тверь&id=1&latitude=   &longitude=4", latitudeMessage},
-		{"latitude with cyrillic char", "name=Тверь&id=1&latitude=лво12&longitude=4", latitudeMessage},
-		{"latitude with special char", "name=Тверь&id=1&latitude=:3:&longitude=4", latitudeMessage},
-		{"latitude with english char", "name=Тверь&id=1&latitude=abc2&longitude=4", latitudeMessage},
-
-		{"empty longitude", "name=Тверь&id=1&latitude=3&longitude=", longitudeMessage},
-		{"longitude with spaces", "name=Тверь&id=1&latitude=3&longitude=    ", longitudeMessage},
-		{"longitude with cyrillic char", "name=Тверь&id=1&latitude=3&longitude=ю.12", longitudeMessage},
-		{"longitude with english chars", "name=Тверь&id=1&latitude=3&longitude=test", longitudeMessage},
-		{"longitude with special char", "name=Тверь&id=1&latitude=3&longitude=№№2", longitudeMessage},
+		{"empty longitude", "name=Тверь&latitude=3&longitude=", longitudeMessage},
+		{"longitude with spaces", "name=Тверь&latitude=3&longitude=    ", longitudeMessage},
+		{"longitude with cyrillic char", "name=Тверь&latitude=3&longitude=ю.12", longitudeMessage},
+		{"longitude with english chars", "name=Тверь&latitude=3&longitude=test", longitudeMessage},
+		{"longitude with special char", "name=Тверь&latitude=3&longitude=№№2", longitudeMessage},
 	}
 
 	for _, tt := range tests {
@@ -255,7 +248,7 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/addLocation",
-		strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"),
+		strings.NewReader("name=Москва&latitude=0&longitude=0"),
 		sessionID,
 	)
 
@@ -292,7 +285,7 @@ func TestAuth_error_absenceOfSessionId(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/addLocation",
-		strings.NewReader("name=Москва&id=1&latitude=0&longitude=0"),
+		strings.NewReader("name=Москва&latitude=0&longitude=0"),
 		"test-session",
 	)
 

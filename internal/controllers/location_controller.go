@@ -52,10 +52,10 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request) {
-	// userId будет получатся, как я понимаю, через сессии, не забудь переделать
-	userId, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil {
-		apierrors.HandleError(w, domain.ErrInvalidId)
+	val := r.Context().Value("session")
+	session, ok := val.(domain.Session)
+	if !ok {
+		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -78,7 +78,7 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 
 	result, err := c.locationService.AddLocation(domain.Location{
 		Name:      r.FormValue("name"),
-		UserID:    userId,
+		UserID:    session.UserID,
 		Latitude:  lat,
 		Longitude: lon,
 	})
