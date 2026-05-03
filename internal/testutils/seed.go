@@ -7,7 +7,7 @@ import (
 func SeedUsers(db *sql.DB) error {
 	_, err := db.Exec(`
 		INSERT INTO users (login, password)
-		VALUES ('test', 'test')
+		VALUES ('test1234', 'qwerty1234')
 	`)
 	return err
 }

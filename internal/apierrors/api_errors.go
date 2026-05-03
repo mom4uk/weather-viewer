@@ -37,7 +37,22 @@ func HandleError(w http.ResponseWriter, err error) {
 		WriteError(w, "Такая локация уже существует", http.StatusConflict)
 		return
 	case errors.Is(err, domain.ErrUserNotFound):
-		WriteError(w, "Пользователь не найден", http.StatusConflict)
+		WriteError(w, "Пользователь не найден", http.StatusNotFound)
+		return
+	case errors.Is(err, domain.ErrLoginInvalidLength):
+		WriteError(w, "Длина логина должен быть от 6 до 20 символов", http.StatusUnprocessableEntity)
+		return
+	case errors.Is(err, domain.ErrPasswordInvalidLength):
+		WriteError(w, "Длина пароля должна быть от 6 до 20 символов", http.StatusUnprocessableEntity)
+		return
+	case errors.Is(err, domain.ErrInvalidLogin):
+		WriteError(w, "Логин может состоять только из латинских букв и цифр", http.StatusUnprocessableEntity)
+		return
+	case errors.Is(err, domain.ErrUserAlreadyExists):
+		WriteError(w, "Пользователь с таким логином уже существует", http.StatusNotFound)
+		return
+	case errors.Is(err, domain.ErrAbsenceOfLoginPass):
+		WriteError(w, "Не передан логин и/или пароль", http.StatusBadRequest)
 		return
 	default:
 		WriteError(w, err.Error(), http.StatusInternalServerError)
