@@ -49,7 +49,7 @@ func HandleError(w http.ResponseWriter, err error) {
 		WriteError(w, "Логин может состоять только из латинских букв и цифр", http.StatusUnprocessableEntity)
 		return
 	case errors.Is(err, domain.ErrUserAlreadyExists):
-		WriteError(w, "Пользователь с таким логином уже существует", http.StatusNotFound)
+		WriteError(w, "Пользователь с таким логином уже существует", http.StatusConflict)
 		return
 	case errors.Is(err, domain.ErrAbsenceOfLoginPass):
 		WriteError(w, "Не передан логин и/или пароль", http.StatusBadRequest)

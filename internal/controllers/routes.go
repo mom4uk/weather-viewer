@@ -6,11 +6,15 @@ import (
 	"weather-viewer/internal/services"
 )
 
-//func RegisterUserRoutes(mux *http.ServeMux, c *UserController) {
-//		mux.Handle("POST /auth/register", middlewares.JSON(http.HandlerFunc(c.RegisterUser)))
-//	mux.Handle("POST /auth/login", middlewares.JSON(http.HandlerFunc(c.LoginUser)))
-//	mux.Handle("POST /auth/logout", middlewares.JSON(http.HandlerFunc(c.LogoutUser)))
-//}
+func RegisterUserRoutes(mux *http.ServeMux, c *UserController, s *services.SessionService) {
+	mux.Handle("POST /auth/register",
+		middlewares.Chain(
+			middlewares.JSON(),
+		)(http.HandlerFunc(c.RegisterUser)),
+	)
+	//mux.Handle("POST /auth/login", middlewares.JSON(http.HandlerFunc(c.LoginUser)))
+	//mux.Handle("POST /auth/logout", middlewares.JSON(http.HandlerFunc(c.LogoutUser))) // сюда s
+}
 
 func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController, s *services.SessionService) {
 	mux.Handle(

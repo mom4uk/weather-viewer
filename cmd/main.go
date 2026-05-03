@@ -15,20 +15,20 @@ func main() {
 
 	srv := server.NewServer()
 
-	//userRepository := repositories.NewUserRepository(db)
+	userRepository := repositories.NewUserRepository(database)
 	locationRepository := repositories.NewLocationRepository(database)
 	sessionRepository := repositories.NewSessionRepository(database)
 
-	//userService := services.NewUserService(userRepository)
+	userService := services.NewUserService(userRepository)
 	sessionService := services.NewSessionService(sessionRepository)
 	locationService := services.NewLocationService(locationRepository)
 
 	middlewares.Auth(sessionService)
 
-	//userController := controllers.NewUserController()
+	userController := controllers.NewUserController(userService)
 	locationController := controllers.NewLocationController(locationService)
 
-	//controllers.RegisterUserRoutes(srv.GetMux(), userController)
+	controllers.RegisterUserRoutes(srv.GetMux(), userController, sessionService)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 
 	if err := srv.Start(); err != nil {

@@ -6,11 +6,6 @@ import (
 	"weather-viewer/internal/domain"
 )
 
-type User struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
 type UserRequest struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
