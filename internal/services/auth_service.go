@@ -33,10 +33,10 @@ func (s *AuthService) RegisterUser(login, password string) (domain.Session, doma
 func (s *AuthService) LoginUser(login, password string) (domain.Session, error) {
 	user, err := s.userService.GetUserByLogin(login)
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, domain.ErrIncorrectCredentials
 	}
 
-	if utilities.ComparePasswords(user.Password, password) {
+	if !utilities.ComparePasswords(user.Password, password) {
 		return domain.Session{}, domain.ErrIncorrectCredentials
 	}
 

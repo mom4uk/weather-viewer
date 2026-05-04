@@ -199,8 +199,133 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 		{"Absence of login and password is not allowed", "", errorMessage},
 		{"Empty password is not allowed", "login=test1234&password=", errorMessage},
 		{"Empty login is not allowed", "login=&password=test1234", errorMessage},
-		{"Password over 20 simbols are not allowed", "login=loginLength20simbols", errorMessage},
-		{"Password less than 6 simbols are not allowed", "password=loginLength20simbols", errorMessage},
+		{"Absence of password is not allowed", "login=loginLength20simbols", errorMessage},
+		{"Absence of login is not allowed", "password=loginLength20simbols", errorMessage},
+	}
+
+	for _, tt := range testData {
+		t.Run(tt.name, func(t *testing.T) {
+			db := testutils.NewTestDB()
+			app := testutils.NewTestApp(db)
+
+			err := testutils.TruncateAll(db.DB)
+			require.NoError(t, err, "truncate error")
+
+			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+				t,
+				app,
+				http.MethodPost,
+				"/auth/register",
+				strings.NewReader(tt.login),
+				"",
+			)
+			testutils.AssertStatus(t, rr, http.StatusBadRequest)
+
+			var got domain.ErrorResponse
+			require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+			expected := domain.ErrorResponse{
+				Message: tt.message,
+			}
+
+			assert.Equal(t, expected, got)
+		})
+	}
+}
+
+// POST /auth/login
+
+func TestLogin_success(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/auth/login",
+		strings.NewReader("login=test1234&password=qwerty1234"),
+		"",
+	)
+	testutils.AssertStatus(t, rr, http.StatusOK)
+}
+
+func TestLogin_error_incorrectLogin(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/auth/login",
+		strings.NewReader("login=incorrectLogin1&password=qwerty1234"),
+		"",
+	)
+	testutils.AssertStatus(t, rr, http.StatusUnauthorized)
+
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+	expected := domain.ErrorResponse{
+		Message: "Неверный логин или пароль",
+	}
+	assert.Equal(t, expected, got)
+}
+
+func TestLogin_error_incorrectPassword(t *testing.T) {
+	db := testutils.NewTestDB()
+	app := testutils.NewTestApp(db)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/auth/login",
+		strings.NewReader("login=test1234&password=incorrectPassword"),
+		"",
+	)
+	testutils.AssertStatus(t, rr, http.StatusUnauthorized)
+
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+	expected := domain.ErrorResponse{
+		Message: "Неверный логин или пароль",
+	}
+	assert.Equal(t, expected, got)
+}
+
+func TestLogin_error_absenceOfFields(t *testing.T) {
+	errorMessage := "Не передан логин и/или пароль"
+
+	testData := []struct {
+		name    string
+		login   string
+		message string
+	}{
+
+		{"Absence of login and password is not allowed", "", errorMessage},
+		{"Empty password is not allowed", "login=test1234&password=", errorMessage},
+		{"Empty login is not allowed", "login=&password=test1234", errorMessage},
+		{"Absence of password is not allowed", "login=loginLength20simbols", errorMessage},
+		{"Absence of login is not allowed", "password=loginLength20simbols", errorMessage},
 	}
 
 	for _, tt := range testData {

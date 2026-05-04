@@ -54,6 +54,9 @@ func HandleError(w http.ResponseWriter, err error) {
 	case errors.Is(err, domain.ErrAbsenceOfLoginPass):
 		WriteError(w, "Не передан логин и/или пароль", http.StatusBadRequest)
 		return
+	case errors.Is(err, domain.ErrIncorrectCredentials):
+		WriteError(w, "Неверный логин или пароль", http.StatusUnauthorized)
+		return
 	default:
 		WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
