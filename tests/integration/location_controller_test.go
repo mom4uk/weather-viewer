@@ -17,13 +17,9 @@ const sessionID = "550e8400-e29b-41d4-a716-446655440000"
 
 // GET /searchLocation/{id}
 func TestSearchLocation_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	err = testutils.SeedSession(db.DB, sessionID)
@@ -54,13 +50,9 @@ func TestSearchLocation_success(t *testing.T) {
 }
 
 func TestSearchLocation_error_incorrectId(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	err = testutils.SeedSession(db.DB, sessionID)
@@ -88,13 +80,9 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 }
 
 func TestSearchLocation_error_locationNotFound(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	err = testutils.SeedSession(db.DB, sessionID)
@@ -160,9 +148,7 @@ func TestAddLocation_success(t *testing.T) {
 }
 
 func TestAddLocation_error_invalidFieldValues(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
+	app, db := testutils.SetupTests(t)
 	nameMessage := "Некорректное значение в name"
 	latitudeMessage := "Некорректное значение в latitude"
 	longitudeMessage := "Некорректное значение в longitude"
@@ -194,7 +180,6 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			err := testutils.TruncateAll(db.DB)
 			require.NoError(t, err, "truncate error")
 
@@ -228,13 +213,9 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 }
 
 func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	err = testutils.SeedSession(db.DB, sessionID)
@@ -265,13 +246,9 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 
 // Auth test
 func TestAuth_error_absenceOfSessionId(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	err = testutils.SeedSession(db.DB, sessionID)
@@ -303,12 +280,8 @@ func TestAuth_error_absenceOfSessionId(t *testing.T) {
 // GET /getLocations
 
 func TestGetLocations_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-	err = testutils.SeedUsers(db.DB)
+	app, db := testutils.SetupTests(t)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 	err = testutils.SeedSession(db.DB, sessionID)
 	require.NoError(t, err, "seed sessions error")
@@ -340,12 +313,8 @@ func TestGetLocations_success(t *testing.T) {
 // DELETE /removeLocation/{id}
 
 func TestRemoveLocation_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-	err = testutils.SeedUsers(db.DB)
+	app, db := testutils.SetupTests(t)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 	err = testutils.SeedSession(db.DB, sessionID)
 	require.NoError(t, err, "seed sessions error")
@@ -385,12 +354,8 @@ func TestRemoveLocation_success(t *testing.T) {
 
 // можно накинуть проверок через test table
 func TestRemoveLocation_error_invalidId(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-	err = testutils.SeedUsers(db.DB)
+	app, db := testutils.SetupTests(t)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 	err = testutils.SeedSession(db.DB, sessionID)
 	require.NoError(t, err, "seed sessions error")

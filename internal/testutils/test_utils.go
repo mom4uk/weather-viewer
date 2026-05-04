@@ -38,3 +38,12 @@ func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Rea
 
 	return rr
 }
+
+func SetupTests(t *testing.T) (*TestApp, *TestDB) {
+	db := NewTestDB()
+	app := NewTestApp(db)
+
+	err := TruncateAll(db.DB)
+	require.NoError(t, err, "truncate error")
+	return app, db
+}

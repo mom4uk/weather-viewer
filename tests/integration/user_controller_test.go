@@ -16,11 +16,7 @@ import (
 // POST /auth/register
 
 func TestRegistration_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
+	app, _ := testutils.SetupTests(t)
 
 	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 		t,
@@ -43,11 +39,7 @@ func TestRegistration_success(t *testing.T) {
 }
 
 func TestRegistration_success_loginWithSpaces(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
-
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
+	app, _ := testutils.SetupTests(t)
 
 	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 		t,
@@ -70,6 +62,7 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 }
 
 func TestRegistration_error_invalidLogin(t *testing.T) {
+	app, db := testutils.SetupTests(t)
 	loginInvalidLengthMessage := "Длина логина должен быть от 6 до 20 символов"
 	invalidLoginMessage := "Логин может состоять только из латинских букв и цифр"
 	testData := []struct {
@@ -85,9 +78,6 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			db := testutils.NewTestDB()
-			app := testutils.NewTestApp(db)
-
 			err := testutils.TruncateAll(db.DB)
 			require.NoError(t, err, "truncate error")
 
@@ -114,13 +104,9 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 }
 
 func TestRegistration_error_nonUniqueLogin(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
@@ -145,6 +131,7 @@ func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 }
 
 func TestRegistration_error_invalidPassword(t *testing.T) {
+	app, db := testutils.SetupTests(t)
 	errorMessage := "Длина пароля должна быть от 6 до 20 символов"
 
 	testData := []struct {
@@ -159,9 +146,6 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			db := testutils.NewTestDB()
-			app := testutils.NewTestApp(db)
-
 			err := testutils.TruncateAll(db.DB)
 			require.NoError(t, err, "truncate error")
 
@@ -188,6 +172,7 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 }
 
 func TestRegistration_error_absenceOfFields(t *testing.T) {
+	app, db := testutils.SetupTests(t)
 	errorMessage := "Не передан логин и/или пароль"
 
 	testData := []struct {
@@ -205,12 +190,8 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			db := testutils.NewTestDB()
-			app := testutils.NewTestApp(db)
-
 			err := testutils.TruncateAll(db.DB)
 			require.NoError(t, err, "truncate error")
-
 			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 				t,
 				app,
@@ -236,13 +217,9 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 // POST /auth/login
 
 func TestLogin_success(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -257,13 +234,9 @@ func TestLogin_success(t *testing.T) {
 }
 
 func TestLogin_error_incorrectLogin(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -285,13 +258,9 @@ func TestLogin_error_incorrectLogin(t *testing.T) {
 }
 
 func TestLogin_error_incorrectPassword(t *testing.T) {
-	db := testutils.NewTestDB()
-	app := testutils.NewTestApp(db)
+	app, db := testutils.SetupTests(t)
 
-	err := testutils.TruncateAll(db.DB)
-	require.NoError(t, err, "truncate error")
-
-	err = testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -313,6 +282,7 @@ func TestLogin_error_incorrectPassword(t *testing.T) {
 }
 
 func TestLogin_error_absenceOfFields(t *testing.T) {
+	app, db := testutils.SetupTests(t)
 	errorMessage := "Не передан логин и/или пароль"
 
 	testData := []struct {
@@ -330,9 +300,6 @@ func TestLogin_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			db := testutils.NewTestDB()
-			app := testutils.NewTestApp(db)
-
 			err := testutils.TruncateAll(db.DB)
 			require.NoError(t, err, "truncate error")
 
