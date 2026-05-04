@@ -12,7 +12,10 @@ func RegisterUserRoutes(mux *http.ServeMux, c *UserController, s *services.Sessi
 			middlewares.JSON(),
 		)(http.HandlerFunc(c.RegisterUser)),
 	)
-	//mux.Handle("POST /auth/login", middlewares.JSON(http.HandlerFunc(c.LoginUser)))
+	mux.Handle("POST /auth/login",
+		middlewares.Chain(
+			middlewares.JSON(),
+		)(http.HandlerFunc(c.LoginUser)))
 	//mux.Handle("POST /auth/logout", middlewares.JSON(http.HandlerFunc(c.LogoutUser))) // сюда s
 }
 

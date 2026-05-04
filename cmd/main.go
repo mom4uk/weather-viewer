@@ -22,10 +22,11 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	sessionService := services.NewSessionService(sessionRepository)
 	locationService := services.NewLocationService(locationRepository)
+	authService := services.NewAuthService(sessionService, userService)
 
 	middlewares.Auth(sessionService)
 
-	userController := controllers.NewUserController(userService, sessionService)
+	userController := controllers.NewUserController(userService, sessionService, authService)
 	locationController := controllers.NewLocationController(locationService)
 
 	controllers.RegisterUserRoutes(srv.GetMux(), userController, sessionService)
