@@ -92,10 +92,11 @@ func (c *UserController) LogoutUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-
+	// я хз, как мне правильно обрабатывать logout. Нужно ли мне обрабатывать как то ошибки или все таки, главное,
+	// что я просто  очистил куки, а очистились они в бд или она с ошибкой упала мне не важно?
 	err = c.authService.LogoutUser(cookie.Value)
 	if err != nil {
-		apierrors.HandleError(w, err)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

@@ -346,3 +346,23 @@ func TestLogout_success(t *testing.T) {
 	)
 	testutils.AssertStatus(t, rr, http.StatusNoContent)
 }
+
+func TestLogout_success_incorrectSessionID(t *testing.T) {
+	app, db := testutils.SetupTests(t)
+
+	err := testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodPost,
+		"/auth/logout",
+		strings.NewReader("login=test1234"),
+		"1",
+	)
+	testutils.AssertStatus(t, rr, http.StatusNoContent)
+}

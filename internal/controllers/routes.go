@@ -21,7 +21,6 @@ func RegisterUserRoutes(mux *http.ServeMux, c *UserController, s *services.Sessi
 	mux.Handle(
 		"POST /auth/logout",
 		middlewares.Chain(
-			middlewares.Auth(s),
 			middlewares.JSON(),
 		)(http.HandlerFunc(c.LogoutUser)))
 }
