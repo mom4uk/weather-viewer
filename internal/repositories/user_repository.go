@@ -17,13 +17,13 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) CreateUser(login, password string) (domain.User, error) {
+func (r *UserRepository) CreateUser(login, hash string) (domain.User, error) {
 	query := "INSERT INTO users (login, password) VALUES ($1, $2) RETURNING id"
 	user := domain.User{
 		Login:    login,
-		Password: password,
+		Password: hash,
 	}
-	err := r.db.QueryRow(query, login, password).Scan(&user.ID)
+	err := r.db.QueryRow(query, login, hash).Scan(&user.ID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {

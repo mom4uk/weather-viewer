@@ -2,13 +2,18 @@ package testutils
 
 import (
 	"database/sql"
+	"weather-viewer/internal/utilities"
 )
 
 func SeedUsers(db *sql.DB) error {
-	_, err := db.Exec(`
+	hash, err := utilities.HashPassword("qwerty1234")
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(`
 		INSERT INTO users (login, password)
-		VALUES ('test1234', 'qwerty1234')
-	`)
+		VALUES ('test1234', $1)
+	`, hash)
 	return err
 }
 

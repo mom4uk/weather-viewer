@@ -18,7 +18,11 @@ func NewAuthService(sessionService *SessionService, userService *UserService) *A
 }
 
 func (s *AuthService) RegisterUser(login, password string) (domain.Session, domain.User, error) {
-	user, err := s.userService.CreateUser(login, password)
+	hash, err := utilities.HashPassword(password)
+	if err != nil {
+		return domain.Session{}, domain.User{}, err
+	}
+	user, err := s.userService.CreateUser(login, hash)
 	if err != nil {
 		return domain.Session{}, domain.User{}, err
 	}
@@ -36,7 +40,7 @@ func (s *AuthService) LoginUser(login, password string) (domain.Session, error) 
 		return domain.Session{}, domain.ErrIncorrectCredentials
 	}
 
-	if !utilities.ComparePasswords(user.Password, password) {
+	if err := utilities.ComparePasswords(user.Password, password); err != nil {
 		return domain.Session{}, domain.ErrIncorrectCredentials
 	}
 

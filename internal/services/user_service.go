@@ -15,8 +15,8 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(login, password string) (domain.User, error) {
-	return s.repo.CreateUser(login, password)
+func (s *UserService) CreateUser(login, hash string) (domain.User, error) {
+	return s.repo.CreateUser(login, hash)
 }
 
 func (s *UserService) GetUserByLogin(login string) (domain.User, error) {
