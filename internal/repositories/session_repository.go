@@ -44,3 +44,12 @@ func (s *SessionRepository) CreateSession(session domain.Session) error {
 	)
 	return err
 }
+
+func (s *SessionRepository) DeleteSession(sessionID string) error {
+	query := `DELETE FROM sessions WHERE id = $1`
+	_, err := s.db.Exec(query, sessionID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

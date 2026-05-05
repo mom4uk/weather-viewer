@@ -46,3 +46,11 @@ func (s *AuthService) LoginUser(login, password string) (domain.Session, error) 
 	}
 	return session, nil
 }
+
+func (s *AuthService) LogoutUser(sessionID string) error {
+	err := s.sessionService.DeleteSession(sessionID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

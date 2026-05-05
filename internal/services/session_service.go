@@ -35,3 +35,7 @@ func (s *SessionService) CreateSession(userId int) (domain.Session, error) {
 
 	return session, nil
 }
+
+func (s *SessionService) DeleteSession(sessionID string) error {
+	return s.repo.DeleteSession(sessionID)
+}

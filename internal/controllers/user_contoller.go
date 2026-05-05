@@ -64,8 +64,10 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 func (c *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
+
 	if err := dto.ValidateCredentials(login, password); err != nil {
 		apierrors.HandleError(w, err)
+		return
 	}
 
 	session, err := c.authService.LoginUser(login, password)
@@ -81,5 +83,27 @@ func (c *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
+	})
+}
+
+func (c *UserController) LogoutUser(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	err = c.authService.LogoutUser(cookie.Value)
+	if err != nil {
+		apierrors.HandleError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   "session_token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
 	})
 }
