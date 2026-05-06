@@ -6,7 +6,7 @@ import (
 	"weather-viewer/internal/services"
 )
 
-func RegisterUserRoutes(mux *http.ServeMux, c *UserController, s *services.SessionService) {
+func RegisterAuthRoutes(mux *http.ServeMux, c *AuthController) {
 	mux.Handle(
 		"POST /auth/register",
 		middlewares.Chain(

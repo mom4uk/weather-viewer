@@ -24,10 +24,10 @@ func NewTestApp(db *TestDB) *TestApp {
 	sessionService := services.NewSessionService(sessionRepository)
 	authService := services.NewAuthService(sessionService, userService)
 
-	userController := controllers.NewUserController(userService, sessionService, authService)
+	userController := controllers.NewAuthController(userService, sessionService, authService)
 	locationController := controllers.NewLocationController(locationService)
 
-	controllers.RegisterUserRoutes(srv.GetMux(), userController, sessionService)
+	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 	return &TestApp{
 		DB:     db,

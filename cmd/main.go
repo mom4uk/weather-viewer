@@ -26,10 +26,10 @@ func main() {
 
 	middlewares.Auth(sessionService)
 
-	userController := controllers.NewUserController(userService, sessionService, authService)
+	userController := controllers.NewAuthController(userService, sessionService, authService)
 	locationController := controllers.NewLocationController(locationService)
 
-	controllers.RegisterUserRoutes(srv.GetMux(), userController, sessionService)
+	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 
 	if err := srv.Start(); err != nil {

@@ -62,7 +62,8 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 }
 
 func TestRegistration_error_invalidLogin(t *testing.T) {
-	app, db := testutils.SetupTests(t)
+	app, _ := testutils.SetupTests(t)
+
 	loginInvalidLengthMessage := "Длина логина должен быть от 6 до 20 символов"
 	invalidLoginMessage := "Логин может состоять только из латинских букв и цифр"
 	testData := []struct {
@@ -78,8 +79,6 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			err := testutils.TruncateAll(db.DB)
-			require.NoError(t, err, "truncate error")
 
 			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 				t,
@@ -131,7 +130,7 @@ func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 }
 
 func TestRegistration_error_invalidPassword(t *testing.T) {
-	app, db := testutils.SetupTests(t)
+	app, _ := testutils.SetupTests(t)
 	errorMessage := "Длина пароля должна быть от 6 до 20 символов"
 
 	testData := []struct {
@@ -146,9 +145,6 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			err := testutils.TruncateAll(db.DB)
-			require.NoError(t, err, "truncate error")
-
 			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 				t,
 				app,
@@ -172,7 +168,7 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 }
 
 func TestRegistration_error_absenceOfFields(t *testing.T) {
-	app, db := testutils.SetupTests(t)
+	app, _ := testutils.SetupTests(t)
 	errorMessage := "Не передан логин и/или пароль"
 
 	testData := []struct {
@@ -190,8 +186,6 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			err := testutils.TruncateAll(db.DB)
-			require.NoError(t, err, "truncate error")
 			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 				t,
 				app,
@@ -282,7 +276,7 @@ func TestLogin_error_incorrectPassword(t *testing.T) {
 }
 
 func TestLogin_error_absenceOfFields(t *testing.T) {
-	app, db := testutils.SetupTests(t)
+	app, _ := testutils.SetupTests(t)
 	errorMessage := "Не передан логин и/или пароль"
 
 	testData := []struct {
@@ -300,9 +294,6 @@ func TestLogin_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			err := testutils.TruncateAll(db.DB)
-			require.NoError(t, err, "truncate error")
-
 			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
 				t,
 				app,

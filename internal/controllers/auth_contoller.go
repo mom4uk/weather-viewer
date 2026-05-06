@@ -9,25 +9,25 @@ import (
 	"weather-viewer/internal/services"
 )
 
-type UserController struct {
+type AuthController struct {
 	userService    *services.UserService
 	sessionService *services.SessionService
 	authService    *services.AuthService
 }
 
-func NewUserController(
+func NewAuthController(
 	userService *services.UserService,
 	sessionService *services.SessionService,
 	authService *services.AuthService,
-) *UserController {
-	return &UserController{
+) *AuthController {
+	return &AuthController{
 		userService:    userService,
 		sessionService: sessionService,
 		authService:    authService,
 	}
 }
 
-func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
 
@@ -61,7 +61,7 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
 
@@ -86,14 +86,14 @@ func (c *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (c *UserController) LogoutUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) LogoutUser(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	// я хз, как мне правильно обрабатывать logout. Нужно ли мне обрабатывать как то ошибки или все таки, главное,
-	// что я просто  очистил куки, а очистились они в бд или она с ошибкой упала мне не важно?
+	// я хз, как мне правильно обрабатывать logout. Нужно ли мне обрабатывать как-то ошибки или все таки, главное,
+	// что я просто очистил куки, а очистились они в бд или она с ошибкой упала мне не важно?
 	err = c.authService.LogoutUser(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
