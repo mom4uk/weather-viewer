@@ -39,12 +39,12 @@ func (s *LocationService) GetLocations(userID int) ([]domain.Location, error) {
 	if err != nil {
 		return []domain.Location{}, err
 	}
-	for _, location := range locations {
-		weather, err := s.getWeather(location)
+	for i := range locations {
+		weather, err := s.getWeather(locations[i])
 		if err != nil {
 			return []domain.Location{}, err
 		}
-		location.Weather = weather
+		locations[i].Weather = weather
 	}
 	return locations, err
 }
