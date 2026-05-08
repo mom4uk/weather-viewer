@@ -1,4 +1,4 @@
-package ports
+package interfaces
 
 import "weather-viewer/internal/domain"
 
