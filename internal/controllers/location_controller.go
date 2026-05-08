@@ -125,6 +125,7 @@ func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request
 			UserID:    location.UserID,
 			Latitude:  location.Latitude,
 			Longitude: location.Longitude,
+			Weather:   location.Weather,
 		})
 	}
 
