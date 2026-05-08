@@ -6,4 +6,5 @@ type Location struct {
 	UserID    int
 	Latitude  float64
 	Longitude float64
+	Weather   Weather
 }

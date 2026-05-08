@@ -45,6 +45,7 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 		UserID:    result.UserID,
 		Latitude:  result.Latitude,
 		Longitude: result.Longitude,
+		Weather:   result.Weather,
 	}
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)

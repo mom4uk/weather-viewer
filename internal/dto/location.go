@@ -12,6 +12,7 @@ type LocationResponse struct {
 	UserID    int
 	Latitude  float64
 	Longitude float64
+	Weather   domain.Weather
 }
 
 type AddLocationRequest struct {
