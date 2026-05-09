@@ -21,7 +21,8 @@ func main() {
 
 	userService := services.NewUserService(userRepository)
 	sessionService := services.NewSessionService(sessionRepository)
-	locationService := services.NewLocationService(locationRepository)
+	weatherService := services.NewWeatherService()
+	locationService := services.NewLocationService(locationRepository, weatherService)
 	authService := services.NewAuthService(sessionService, userService)
 
 	middlewares.Auth(sessionService)

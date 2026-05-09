@@ -20,7 +20,8 @@ func NewTestApp(db *TestDB) *TestApp {
 	userRepository := repositories.NewUserRepository(db.DB)
 
 	userService := services.NewUserService(userRepository)
-	locationService := services.NewLocationService(locationRepository)
+	weatherService := services.NewWeatherService()
+	locationService := services.NewLocationService(locationRepository, weatherService)
 	sessionService := services.NewSessionService(sessionRepository)
 	authService := services.NewAuthService(sessionService, userService)
 
