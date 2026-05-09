@@ -18,7 +18,7 @@ import (
 func TestRegistration_success(t *testing.T) {
 	app, _ := testutils.SetupTests(t)
 
-	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+	rr := testutils.PerformRequest(
 		t,
 		app,
 		http.MethodPost,
@@ -41,12 +41,12 @@ func TestRegistration_success(t *testing.T) {
 func TestRegistration_success_loginWithSpaces(t *testing.T) {
 	app, _ := testutils.SetupTests(t)
 
-	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+	rr := testutils.PerformRequest(
 		t,
 		app,
 		http.MethodPost,
 		"/auth/register",
-		strings.NewReader("login=loginLength20simbols   &password=6chars"),
+		strings.NewReader("login=  loginLength20simbols   &password=6chars"),
 		"",
 	)
 
@@ -80,7 +80,7 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 
-			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+			rr := testutils.PerformRequest(
 				t,
 				app,
 				http.MethodPost,
@@ -108,7 +108,7 @@ func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 	err := testutils.SeedUsers(db.DB)
 	require.NoError(t, err, "seed users error")
 
-	rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+	rr := testutils.PerformRequest(
 		t,
 		app,
 		http.MethodPost,
@@ -145,7 +145,7 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+			rr := testutils.PerformRequest(
 				t,
 				app,
 				http.MethodPost,
@@ -186,7 +186,7 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+			rr := testutils.PerformRequest(
 				t,
 				app,
 				http.MethodPost,
@@ -294,7 +294,7 @@ func TestLogin_error_absenceOfFields(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			rr := testutils.PerformRequest( // подумать над тем как вынести session_token отсюда, он не всегда нужен
+			rr := testutils.PerformRequest(
 				t,
 				app,
 				http.MethodPost,
