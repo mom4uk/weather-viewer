@@ -34,7 +34,7 @@ func Auth(s *services.SessionService) Middleware {
 				return
 			}
 
-			if session.ExpiresAt.Before(time.Now()) {
+			if session.IsExpired(time.Now()) {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
