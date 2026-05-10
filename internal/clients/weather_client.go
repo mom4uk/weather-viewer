@@ -48,7 +48,10 @@ func (c *WeatherClient) GetWeather(location domain.Location) (domain.Weather, er
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return weather, fmt.Errorf("weather api error: %s", resp.Status)
+		return weather, domain.WeatherAPIError{
+			StatusCode: resp.StatusCode,
+			Message:    resp.Status,
+		}
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&weather); err != nil {

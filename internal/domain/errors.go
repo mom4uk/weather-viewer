@@ -6,6 +6,15 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+type WeatherAPIError struct {
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
+}
+
+func (e WeatherAPIError) Error() string {
+	return e.Message
+}
+
 var (
 	ErrInvalidId             = errors.New("incorrect id for location")
 	ErrLocationNotFound      = errors.New("location not found")
