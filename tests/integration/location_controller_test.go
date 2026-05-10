@@ -295,36 +295,64 @@ func TestAuth_error_absenceOfSessionId(t *testing.T) {
 
 // GET /getLocations
 
-//func TestGetLocations_success(t *testing.T) {
-//	app, db := testutils.SetupTests(t)
-//	err := testutils.SeedUsers(db.DB)
-//	require.NoError(t, err, "seed users error")
-//	err = testutils.SeedSession(db.DB, sessionID)
-//	require.NoError(t, err, "seed sessions error")
-//	err = testutils.SeedLocations(db.DB)
-//	require.NoError(t, err, "seed locations error")
-//
-//	rr := testutils.PerformRequest(
-//		t,
-//		app,
-//		http.MethodGet,
-//		"/getLocations",
-//		nil,
-//		sessionID,
-//	)
-//
-//	testutils.AssertStatus(t, rr, http.StatusOK)
-//
-//	var got []dto.LocationResponse
-//	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
-//
-//	expected := []dto.LocationResponse{
-//		{ID: 1, Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0},
-//		{ID: 2, Name: "Санкт-Петербург", UserID: 1, Latitude: 1, Longitude: 1},
-//	}
-//
-//	assert.Equal(t, expected, got)
-//}
+func TestGetLocations_success(t *testing.T) {
+	server := testutils.NewErrorServer(200)
+	defer server.Close()
+
+	weatherClient := &clients.WeatherClient{
+		URL:    server.URL,
+		APIKey: "key",
+		Client: server.Client(),
+	}
+
+	db := testutils.NewTestDB()
+	app := testutils.NewTestAppForWeather(db, weatherClient)
+
+	err := testutils.TruncateAll(db.DB)
+	require.NoError(t, err, "truncate db error")
+
+	err = testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/getLocations",
+		nil,
+		sessionID,
+	)
+
+	testutils.AssertStatus(t, rr, http.StatusOK)
+
+	var got []dto.LocationResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	expected := []dto.LocationResponse{
+		{
+			ID:        1,
+			Name:      "Москва",
+			UserID:    1,
+			Latitude:  55.7522,
+			Longitude: 37.6156,
+			Weather:   fixtures.GetMoscowWeather(),
+		},
+		{
+			ID:        2,
+			Name:      "Санкт-Петербург",
+			UserID:    1,
+			Latitude:  59.8944,
+			Longitude: 30.2642,
+			Weather:   fixtures.GetSpbWeather(),
+		},
+	}
+
+	assert.Equal(t, expected, got)
+}
 
 // DELETE /removeLocation/{id}
 
