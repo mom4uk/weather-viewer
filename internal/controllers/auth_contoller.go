@@ -41,7 +41,7 @@ func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		apierrors.HandleError(w, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusCreated)
 
 	res := dto.UserResponse{
