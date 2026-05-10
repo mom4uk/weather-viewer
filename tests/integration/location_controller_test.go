@@ -69,39 +69,6 @@ func TestSearchLocation_success(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
-//func TestSearchLocation_success(t *testing.T) {
-//	app, db := testutils.SetupTests(t)
-//
-//	err := testutils.SeedUsers(db.DB)
-//	require.NoError(t, err, "seed users error")
-//
-//	err = testutils.SeedSession(db.DB, sessionID)
-//	require.NoError(t, err, "seed sessions error")
-//
-//	err = testutils.SeedLocations(db.DB)
-//	require.NoError(t, err, "seed locations error")
-//
-//	rr := testutils.PerformRequest(
-//		t,
-//		app,
-//		http.MethodGet,
-//		"/searchLocation/1",
-//		nil,
-//		sessionID,
-//	)
-//
-//	testutils.AssertStatus(t, rr, http.StatusOK)
-//
-//	var got dto.LocationResponse
-//	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
-//
-//	expected := dto.LocationResponse{
-//		ID: 1, Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0,
-//	}
-//
-//	assert.Equal(t, expected, got)
-//}
-
 func TestSearchLocation_error_incorrectId(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
