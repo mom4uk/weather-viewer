@@ -18,5 +18,8 @@ func TestSearchLocation_success(t *testing.T) {
 
 	assert.Equal(t, 1, location.ID)
 	assert.Equal(t, "Москва", location.Name)
+	assert.Equal(t, 1, location.ID)
+	assert.Equal(t, 55.7522, location.Latitude)
+	assert.Equal(t, 37.6156, location.Longitude)
 	assert.NotEmpty(t, location.Weather)
 }
