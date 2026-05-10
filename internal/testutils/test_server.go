@@ -4,59 +4,50 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 )
 
 func NewErrorServer(status int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(status)
-		fmt.Fprintf(
-			w,
-			`{
-				"coord": {
-					"lon": 37.6156,
-					"lat": 55.7522
-				},
-				"weather": [
-					{
-						"id": 804,
-						"main": "Clouds",
-						"description": "overcast clouds",
-						"icon": "05d"
-					}
-				],
-				"base": "stations",
-				"main": {
-					"temp": 285.85,
-					"feels_like": 284.32,
-					"temp_min": 285.01,
-					"temp_max": 286.39,
-					"pressure": 1019,
-					"humidity": 44,
-					"sea_level": 1019,
-					"grnd_level": 1001
-				},
-				"visibility": 10000,
-				"wind": {
-					"speed": 4.62,
-					"deg": 138,
-					"gust": 10.04
-				},
-				"clouds": {
-					"all": 100
-				},
-				"dt": 1778422833,
-				"sys": {
-					"type": 2,
-					"id": 2094500,
-					"country": "RU",
-					"sunrise": 1778376482,
-					"sunset": 1778433835
-				},
-				"timezone": 10800,
-				"id": 524901,
-				"name": "Москва",
-				"cod": 200
-			}`,
-		)
+
+		location := r.URL.Query().Get("q")
+
+		switch location {
+		case "Москва":
+			mskWeather, err := os.ReadFile("../../tests/fixtures/msk_weather_fixture.json")
+			if err != nil {
+				panic(err)
+			}
+			_, err = fmt.Fprintf(
+				w,
+				`%s`,
+				string(mskWeather),
+			)
+			if err != nil {
+				panic(err)
+			}
+			break
+		case "Санкт-Петербург":
+			sbpWeather, err := os.ReadFile("../../tests/fixtures/spb_weather_fixture.json")
+			if err != nil {
+				panic(err)
+			}
+			_, err = fmt.Fprintf(
+				w,
+				`%s`,
+				string(sbpWeather),
+			)
+			if err != nil {
+				panic(err)
+			}
+			break
+		default:
+			_, err := fmt.Fprintf(w, `На эту локацию нет стаба %s`, location)
+			if err != nil {
+				panic(err)
+			}
+			return
+		}
 	}))
 }
