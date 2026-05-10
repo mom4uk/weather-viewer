@@ -17,6 +17,7 @@ func WriteError(w http.ResponseWriter, message string, code int) {
 }
 
 func HandleError(w http.ResponseWriter, err error) {
+	var weatherErr domain.WeatherAPIError
 	switch {
 	case errors.Is(err, domain.ErrInvalidId):
 		WriteError(w, "Некорректное значение в id", http.StatusBadRequest)
@@ -56,6 +57,9 @@ func HandleError(w http.ResponseWriter, err error) {
 		return
 	case errors.Is(err, domain.ErrIncorrectCredentials):
 		WriteError(w, "Неверный логин или пароль", http.StatusUnauthorized)
+		return
+	case errors.As(err, &weatherErr):
+		WriteError(w, weatherErr.Message, http.StatusBadGateway)
 		return
 	default:
 		WriteError(w, err.Error(), http.StatusInternalServerError)
