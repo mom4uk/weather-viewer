@@ -1,31 +1,43 @@
-package services
+package clients
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"weather-viewer/internal/domain"
 )
 
-type WeatherService struct {
+type WeatherClient struct {
+	URL    string
+	APIKey string
+	Client *http.Client
 }
 
-func NewWeatherService() *WeatherService {
-	return &WeatherService{}
+func NewWeatherClient(url, apiKey string, client *http.Client) *WeatherClient {
+	return &WeatherClient{
+		URL:    url,
+		APIKey: apiKey,
+		Client: client,
+	}
 }
 
-func (s *WeatherService) GetWeather(location domain.Location) (domain.Weather, error) {
-	apiKey := os.Getenv("API_KEY_WEATHER")
+func (c *WeatherClient) GetWeather(location domain.Location) (domain.Weather, error) {
 	url := fmt.Sprintf(
-		"https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s",
+		"%s/data/2.5/weather?q=%s&appid=%s",
+		c.URL,
 		location.Name,
-		apiKey,
+		c.APIKey,
 	)
+
 	var weather domain.Weather
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return domain.Weather{}, err
+	}
+
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return weather, err
 	}
@@ -34,11 +46,14 @@ func (s *WeatherService) GetWeather(location domain.Location) (domain.Weather, e
 			log.Printf("response close error: %v", err)
 		}
 	}()
+
 	if resp.StatusCode != http.StatusOK {
 		return weather, fmt.Errorf("weather api error: %s", resp.Status)
 	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&weather); err != nil {
 		return weather, fmt.Errorf("json decode error")
 	}
+
 	return weather, nil
 }

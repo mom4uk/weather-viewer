@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"os"
 	"weather-viewer/db"
+	"weather-viewer/internal/clients"
 	"weather-viewer/internal/controllers"
 	"weather-viewer/internal/middlewares"
 	"weather-viewer/internal/repositories"
@@ -19,10 +22,12 @@ func main() {
 	locationRepository := repositories.NewLocationRepository(database)
 	sessionRepository := repositories.NewSessionRepository(database)
 
+	apiKey := os.Getenv("WEATHER_API_KEY")
+	weatherClient := clients.NewWeatherClient("https://api.openweathermap.org", apiKey, http.DefaultClient)
+
 	userService := services.NewUserService(userRepository)
 	sessionService := services.NewSessionService(sessionRepository)
-	weatherService := services.NewWeatherService()
-	locationService := services.NewLocationService(locationRepository, weatherService)
+	locationService := services.NewLocationService(locationRepository, weatherClient)
 	authService := services.NewAuthService(sessionService, userService)
 
 	middlewares.Auth(sessionService)

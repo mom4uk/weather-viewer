@@ -7,13 +7,13 @@ import (
 
 type LocationService struct {
 	LocationRepository interfaces.LocationRepository
-	WeatherService     interfaces.Weather
+	WeatherClient      interfaces.Weather
 }
 
-func NewLocationService(locationRepository interfaces.LocationRepository, weatherService interfaces.Weather) *LocationService {
+func NewLocationService(locationRepository interfaces.LocationRepository, WeatherClient interfaces.Weather) *LocationService {
 	return &LocationService{
 		LocationRepository: locationRepository,
-		WeatherService:     weatherService,
+		WeatherClient:      WeatherClient,
 	}
 }
 
@@ -22,7 +22,7 @@ func (s *LocationService) GetLocation(id int) (domain.Location, error) {
 	if err != nil {
 		return domain.Location{}, err
 	}
-	weather, err := s.WeatherService.GetWeather(location)
+	weather, err := s.WeatherClient.GetWeather(location)
 	location.Weather = weather
 	return location, err
 }
@@ -37,7 +37,7 @@ func (s *LocationService) GetLocations(userID int) ([]domain.Location, error) {
 		return []domain.Location{}, err
 	}
 	for i := range locations {
-		weather, err := s.WeatherService.GetWeather(locations[i])
+		weather, err := s.WeatherClient.GetWeather(locations[i])
 		if err != nil {
 			return []domain.Location{}, err
 		}
