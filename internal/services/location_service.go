@@ -47,6 +47,8 @@ func (s *LocationService) GetLocations(userID int) ([]domain.Location, error) {
 			return []domain.Location{}, err
 		}
 		locations[i].Weather = weather
+		locations[i].Latitude = weather.Coord.Lat
+		locations[i].Longitude = weather.Coord.Lon
 	}
 	return locations, err
 }
