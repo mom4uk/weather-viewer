@@ -16,7 +16,7 @@ import (
 // POST /auth/register
 
 func TestRegistration_success(t *testing.T) {
-	app, _ := testutils.SetupTests(t)
+	app, db := testutils.SetupTests(t)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -34,12 +34,30 @@ func TestRegistration_success(t *testing.T) {
 	expected := dto.UserResponse{
 		Login: "loginLength20simbols",
 	}
-
 	assert.Equal(t, expected, got)
+	cookies := rr.Header()["Set-Cookie"]
+
+	var sessionToken string
+	for _, c := range cookies {
+		if strings.Contains(c, "session_token=") {
+			sessionToken = strings.Split(strings.Split(c, "=")[1], ";")[0]
+		}
+	}
+
+	assert.NotEmpty(t, sessionToken)
+	var count int
+	err := db.DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM users 
+		WHERE login = $1
+	`, expected.Login).Scan(&count)
+
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
 }
 
 func TestRegistration_success_loginWithSpaces(t *testing.T) {
-	app, _ := testutils.SetupTests(t)
+	app, db := testutils.SetupTests(t)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -59,6 +77,25 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, got)
+	cookies := rr.Header()["Set-Cookie"]
+
+	var sessionToken string
+	for _, c := range cookies {
+		if strings.Contains(c, "session_token=") {
+			sessionToken = strings.Split(strings.Split(c, "=")[1], ";")[0]
+		}
+	}
+
+	assert.NotEmpty(t, sessionToken)
+	var count int
+	err := db.DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM users 
+		WHERE login = $1
+	`, expected.Login).Scan(&count)
+
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
 }
 
 func TestRegistration_error_invalidLogin(t *testing.T) {
