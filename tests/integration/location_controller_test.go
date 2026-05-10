@@ -69,6 +69,69 @@ func TestSearchLocation_success(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
+func TestSearchLocation_weatherAPIErrors(t *testing.T) {
+	tests := []struct {
+		name           string
+		weatherStatus  int
+		expectedStatus int
+	}{
+		{
+			name:           "weather api 404",
+			weatherStatus:  http.StatusNotFound,
+			expectedStatus: http.StatusBadGateway,
+		},
+		{
+			name:           "weather api 500",
+			weatherStatus:  http.StatusInternalServerError,
+			expectedStatus: http.StatusBadGateway,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := testutils.NewErrorServer(tt.weatherStatus)
+			defer server.Close()
+
+			weatherClient := &clients.WeatherClient{
+				URL:    server.URL,
+				APIKey: "key",
+				Client: server.Client(),
+			}
+
+			db := testutils.NewTestDB()
+			app := testutils.NewTestAppForWeather(db, weatherClient)
+
+			err := testutils.TruncateAll(db.DB)
+			require.NoError(t, err, "truncate error")
+
+			err = testutils.SeedUsers(db.DB)
+			require.NoError(t, err, "seed users error")
+
+			err = testutils.SeedSession(db.DB, sessionID)
+			require.NoError(t, err, "seed sessions error")
+
+			err = testutils.SeedLocations(db.DB)
+			require.NoError(t, err, "seed locations error")
+
+			rr := testutils.PerformRequest(
+				t,
+				app,
+				http.MethodGet,
+				"/searchLocation/1",
+				nil,
+				sessionID,
+			)
+
+			testutils.AssertStatus(t, rr, tt.expectedStatus)
+
+			var got domain.ErrorResponse
+			require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+			assert.NotEmpty(t, got.Message)
+		})
+	}
+}
+
 func TestSearchLocation_error_incorrectId(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
