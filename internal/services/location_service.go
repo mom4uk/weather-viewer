@@ -23,7 +23,12 @@ func (s *LocationService) GetLocation(id int) (domain.Location, error) {
 		return domain.Location{}, err
 	}
 	weather, err := s.WeatherClient.GetWeather(location)
+	if err != nil {
+		return domain.Location{}, err
+	}
 	location.Weather = weather
+	location.Latitude = weather.Coord.Lat
+	location.Longitude = weather.Coord.Lon
 	return location, err
 }
 
