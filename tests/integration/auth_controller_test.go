@@ -394,3 +394,42 @@ func TestLogout_success_incorrectSessionID(t *testing.T) {
 	)
 	testutils.AssertStatus(t, rr, http.StatusNoContent)
 }
+
+// Session
+
+func TestSession_error_sessionExpired(t *testing.T) {
+	app, db := testutils.SetupTests(t)
+
+	err := testutils.SeedUsers(db.DB)
+	require.NoError(t, err, "seed users error")
+
+	err = testutils.SeedSession(db.DB, sessionID)
+	require.NoError(t, err, "seed sessions error")
+
+	err = testutils.SeedLocations(db.DB)
+	require.NoError(t, err, "seed locations error")
+
+	_, err = db.DB.Exec(`
+		UPDATE sessions
+		SET expires_at = NOW() - INTERVAL '1 minute'
+		WHERE id = $1
+	`, sessionID)
+	assert.NoError(t, err)
+
+	rr := testutils.PerformRequest(
+		t,
+		app,
+		http.MethodGet,
+		"/getLocations",
+		nil,
+		sessionID,
+	)
+	testutils.AssertStatus(t, rr, http.StatusUnauthorized)
+
+	var got domain.ErrorResponse
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+	expected := domain.ErrorResponse{
+		Message: "Unauthorized",
+	}
+	assert.Equal(t, expected, got)
+}
