@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
 	"weather-viewer/internal/apierrors"
 	"weather-viewer/internal/services"
 )
@@ -29,6 +31,11 @@ func Auth(s *services.SessionService) Middleware {
 
 			session, err := s.GetSession(cookie.Value)
 			if err != nil {
+				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			fmt.Println("lakjsdlkfjasdf", session, session.ExpiresAt.Before(time.Now()))
+			if session.ExpiresAt.Before(time.Now()) {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
