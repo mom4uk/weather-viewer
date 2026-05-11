@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func InitDB() *sql.DB {
+func InitPostgres() *sql.DB {
 	dsl := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", dsl)
 	if err != nil {
