@@ -22,6 +22,7 @@ func main() {
 	redis := db.InitRedis()
 
 	srv := server.NewServer()
+	srv.InitStatic()
 
 	userRepository := repositories.NewUserRepository(postgres)
 	locationRepository := repositories.NewLocationRepository(postgres)
@@ -37,7 +38,10 @@ func main() {
 
 	middlewares.Auth(sessionService)
 
-	renderer, _ := render.NewTemplateRenderer("templates/*.html")
+	renderer, err := render.NewTemplateRenderer("templates/*.html")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	pageController := controllers.NewPageController(
 		renderer,
