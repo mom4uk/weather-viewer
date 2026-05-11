@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterPageRoutes(mux *http.ServeMux, c *PageController) {
-	mux.Handle("GET /", http.HandlerFunc(c.Home))
+	mux.Handle("GET /{$}", http.HandlerFunc(c.Home))
 	mux.Handle("GET /sign-in", http.HandlerFunc(c.SignIn))
 	mux.Handle("GET /sign-up", http.HandlerFunc(c.SignUp))
 	mux.Handle("GET /error", http.HandlerFunc(c.Error))
@@ -58,6 +58,11 @@ func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController, s *servic
 		middlewares.Chain(
 			middlewares.Auth(s),
 			middlewares.JSON(),
+		)(http.HandlerFunc(c.RemoveLocation)),
+	)
+	mux.Handle("POST /removeLocation/{id}",
+		middlewares.Chain(
+			middlewares.Auth(s),
 		)(http.HandlerFunc(c.RemoveLocation)),
 	)
 }
