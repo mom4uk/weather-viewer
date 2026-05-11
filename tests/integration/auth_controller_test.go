@@ -7,7 +7,7 @@ import (
 	"testing"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
-	"weather-viewer/internal/testutils"
+	"weather-viewer/tests/testutils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,7 +46,7 @@ func TestRegistration_success(t *testing.T) {
 
 	assert.NotEmpty(t, sessionToken)
 	var count int
-	err := db.DB.QueryRow(`
+	err := db.Postgres.QueryRow(`
 		SELECT COUNT(*) 
 		FROM users 
 		WHERE login = $1
@@ -88,7 +88,7 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 
 	assert.NotEmpty(t, sessionToken)
 	var count int
-	err := db.DB.QueryRow(`
+	err := db.Postgres.QueryRow(`
 		SELECT COUNT(*) 
 		FROM users 
 		WHERE login = $1
@@ -142,7 +142,7 @@ func TestRegistration_error_invalidLogin(t *testing.T) {
 func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -250,7 +250,7 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 func TestLogin_success(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -267,7 +267,7 @@ func TestLogin_success(t *testing.T) {
 func TestLogin_error_incorrectLogin(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -291,7 +291,7 @@ func TestLogin_error_incorrectLogin(t *testing.T) {
 func TestLogin_error_incorrectPassword(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
 	rr := testutils.PerformRequest(
@@ -358,10 +358,10 @@ func TestLogin_error_absenceOfFields(t *testing.T) {
 func TestLogout_success(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
+	err = testutils.SeedSession(db.Postgres, sessionID)
 	require.NoError(t, err, "seed sessions error")
 
 	rr := testutils.PerformRequest(
@@ -378,10 +378,10 @@ func TestLogout_success(t *testing.T) {
 func TestLogout_success_incorrectSessionID(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
+	err = testutils.SeedSession(db.Postgres, sessionID)
 	require.NoError(t, err, "seed sessions error")
 
 	rr := testutils.PerformRequest(
@@ -400,16 +400,16 @@ func TestLogout_success_incorrectSessionID(t *testing.T) {
 func TestSession_error_sessionExpired(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
+	err = testutils.SeedSession(db.Postgres, sessionID)
 	require.NoError(t, err, "seed sessions error")
 
-	err = testutils.SeedLocations(db.DB)
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
 
-	_, err = db.DB.Exec(`
+	_, err = db.Postgres.Exec(`
 		UPDATE sessions
 		SET expires_at = NOW() - INTERVAL '1 minute'
 		WHERE id = $1

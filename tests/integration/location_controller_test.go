@@ -8,8 +8,8 @@ import (
 	"weather-viewer/internal/clients"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
-	"weather-viewer/internal/testutils"
 	"weather-viewer/tests/fixtures"
+	"weather-viewer/tests/testutils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,17 +31,16 @@ func TestSearchLocation_success(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestAppForWeather(db, weatherClient)
 
-	err := testutils.TruncateAll(db.DB)
+	err := testutils.TruncateAll(db.Postgres)
 	require.NoError(t, err, "truncate db error")
 
-	err = testutils.SeedUsers(db.DB)
+	err = testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-
-	err = testutils.SeedLocations(db.DB)
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
+
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -49,7 +48,7 @@ func TestSearchLocation_success(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/1",
 		nil,
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusOK)
@@ -70,6 +69,7 @@ func TestSearchLocation_success(t *testing.T) {
 }
 
 func TestSearchLocation_weatherAPIErrors(t *testing.T) {
+
 	tests := []struct {
 		name           string
 		weatherStatus  int
@@ -101,16 +101,15 @@ func TestSearchLocation_weatherAPIErrors(t *testing.T) {
 			db := testutils.NewTestDB()
 			app := testutils.NewTestAppForWeather(db, weatherClient)
 
-			err := testutils.TruncateAll(db.DB)
+			token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
+
+			err := testutils.TruncateAll(db.Postgres)
 			require.NoError(t, err, "truncate error")
 
-			err = testutils.SeedUsers(db.DB)
+			err = testutils.SeedUsers(db.Postgres)
 			require.NoError(t, err, "seed users error")
 
-			err = testutils.SeedSession(db.DB, sessionID)
-			require.NoError(t, err, "seed sessions error")
-
-			err = testutils.SeedLocations(db.DB)
+			err = testutils.SeedLocations(db.Postgres)
 			require.NoError(t, err, "seed locations error")
 
 			rr := testutils.PerformRequest(
@@ -119,7 +118,7 @@ func TestSearchLocation_weatherAPIErrors(t *testing.T) {
 				http.MethodGet,
 				"/searchLocation/1",
 				nil,
-				sessionID,
+				token,
 			)
 
 			testutils.AssertStatus(t, rr, tt.expectedStatus)
@@ -135,11 +134,10 @@ func TestSearchLocation_weatherAPIErrors(t *testing.T) {
 func TestSearchLocation_error_incorrectId(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -147,7 +145,7 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/aaa",
 		nil,
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusBadRequest)
@@ -165,11 +163,10 @@ func TestSearchLocation_error_incorrectId(t *testing.T) {
 func TestSearchLocation_error_locationNotFound(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -177,7 +174,7 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/244",
 		nil,
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusNotFound)
@@ -197,11 +194,10 @@ func TestSearchLocation_error_locationNotFound(t *testing.T) {
 func TestAddLocation_success(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -209,7 +205,7 @@ func TestAddLocation_success(t *testing.T) {
 		http.MethodPost,
 		"/addLocation",
 		strings.NewReader("name=Тверь&id=1&latitude=3&longitude=4"),
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusCreated)
@@ -259,14 +255,13 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := testutils.TruncateAll(db.DB)
+			err := testutils.TruncateAll(db.Postgres)
 			require.NoError(t, err, "truncate error")
 
-			err = testutils.SeedUsers(db.DB)
+			err = testutils.SeedUsers(db.Postgres)
 			require.NoError(t, err, "seed users error")
 
-			err = testutils.SeedSession(db.DB, sessionID)
-			require.NoError(t, err, "seed sessions error")
+			token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 			rr := testutils.PerformRequest(
 				t,
@@ -274,7 +269,7 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 				http.MethodPost,
 				"/addLocation",
 				strings.NewReader(tt.input),
-				sessionID,
+				token,
 			)
 
 			testutils.AssertStatus(t, rr, http.StatusBadRequest)
@@ -294,14 +289,13 @@ func TestAddLocation_error_invalidFieldValues(t *testing.T) {
 func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-
-	err = testutils.SeedLocations(db.DB)
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
+
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -309,7 +303,7 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 		http.MethodPost,
 		"/addLocation",
 		strings.NewReader("name=Москва&latitude=0&longitude=0"),
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusConflict)
@@ -327,13 +321,10 @@ func TestAddLocation_error_locationAlreadyExists(t *testing.T) {
 func TestAuth_error_absenceOfSessionId(t *testing.T) {
 	app, db := testutils.SetupTests(t)
 
-	err := testutils.SeedUsers(db.DB)
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
 
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-
-	err = testutils.SeedLocations(db.DB)
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
 
 	rr := testutils.PerformRequest(
@@ -342,7 +333,7 @@ func TestAuth_error_absenceOfSessionId(t *testing.T) {
 		http.MethodPost,
 		"/addLocation",
 		strings.NewReader("name=Москва&latitude=0&longitude=0"),
-		"test-session",
+		"",
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusUnauthorized)
@@ -371,15 +362,16 @@ func TestGetLocations_success(t *testing.T) {
 	db := testutils.NewTestDB()
 	app := testutils.NewTestAppForWeather(db, weatherClient)
 
-	err := testutils.TruncateAll(db.DB)
+	err := testutils.TruncateAll(db.Postgres)
 	require.NoError(t, err, "truncate db error")
 
-	err = testutils.SeedUsers(db.DB)
+	err = testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-	err = testutils.SeedLocations(db.DB)
+
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
+
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -387,7 +379,7 @@ func TestGetLocations_success(t *testing.T) {
 		http.MethodGet,
 		"/getLocations",
 		nil,
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusOK)
@@ -421,12 +413,14 @@ func TestGetLocations_success(t *testing.T) {
 
 func TestRemoveLocation_success(t *testing.T) {
 	app, db := testutils.SetupTests(t)
-	err := testutils.SeedUsers(db.DB)
+
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-	err = testutils.SeedLocations(db.DB)
+
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
+
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -434,7 +428,7 @@ func TestRemoveLocation_success(t *testing.T) {
 		http.MethodDelete,
 		"/removeLocation/1",
 		nil,
-		sessionID,
+		token,
 	)
 	testutils.AssertStatus(t, rr, http.StatusNoContent)
 
@@ -444,7 +438,7 @@ func TestRemoveLocation_success(t *testing.T) {
 		http.MethodGet,
 		"/searchLocation/1",
 		nil,
-		sessionID,
+		token,
 	)
 
 	testutils.AssertStatus(t, rr, http.StatusNotFound)
@@ -462,12 +456,14 @@ func TestRemoveLocation_success(t *testing.T) {
 // можно накинуть проверок через test table
 func TestRemoveLocation_error_invalidId(t *testing.T) {
 	app, db := testutils.SetupTests(t)
-	err := testutils.SeedUsers(db.DB)
+
+	err := testutils.SeedUsers(db.Postgres)
 	require.NoError(t, err, "seed users error")
-	err = testutils.SeedSession(db.DB, sessionID)
-	require.NoError(t, err, "seed sessions error")
-	err = testutils.SeedLocations(db.DB)
+
+	err = testutils.SeedLocations(db.Postgres)
 	require.NoError(t, err, "seed locations error")
+
+	token := testutils.SignInUser(t, app, testutils.TestLogin, testutils.TestPassword)
 
 	rr := testutils.PerformRequest(
 		t,
@@ -475,7 +471,7 @@ func TestRemoveLocation_error_invalidId(t *testing.T) {
 		http.MethodDelete,
 		"/removeLocation/1a4",
 		nil,
-		sessionID,
+		token,
 	)
 	testutils.AssertStatus(t, rr, http.StatusBadRequest)
 
