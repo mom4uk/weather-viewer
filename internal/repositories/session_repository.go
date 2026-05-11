@@ -1,55 +1,44 @@
 package repositories
 
 import (
-	"database/sql"
-	"errors"
+	"context"
 	"fmt"
+	"strconv"
 	"weather-viewer/internal/domain"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type SessionRepository struct {
-	db *sql.DB
+	client *redis.Client
 }
 
-func NewSessionRepository(db *sql.DB) *SessionRepository {
+func NewSessionRepository(client *redis.Client) *SessionRepository {
 	return &SessionRepository{
-		db: db,
+		client: client,
 	}
 }
 
-func (s *SessionRepository) GetSession(id string) (domain.Session, error) {
-	query := `SELECT id, user_id, expires_at FROM sessions WHERE id = $1`
-
-	var session domain.Session
-
-	err := s.db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.ExpiresAt)
+func (s *SessionRepository) GetUserID(ctx context.Context, sessionToken string) (int, error) {
+	val, err := s.client.Get(ctx, sessionToken).Result()
 	if err != nil {
-		fmt.Print(err)
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Session{}, domain.ErrSessionNotFound
-		}
-		return domain.Session{}, err
+		return 0, err
 	}
 
-	return session, nil
-}
-
-func (s *SessionRepository) CreateSession(session domain.Session) error {
-	query := `INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, $3)`
-	_, err := s.db.Exec(
-		query,
-		session.ID,
-		session.UserID,
-		session.ExpiresAt,
-	)
-	return err
-}
-
-func (s *SessionRepository) DeleteSession(sessionID string) error {
-	query := `DELETE FROM sessions WHERE id = $1`
-	_, err := s.db.Exec(query, sessionID)
+	userID, err := strconv.Atoi(val)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+
+	return userID, nil
+}
+
+func (s *SessionRepository) CreateSession(ctx context.Context, session domain.Session) error {
+	key := fmt.Sprintf("session:%v", session.ID)
+	return s.client.Set(ctx, key, session.UserID, session.Duration).Err()
+}
+
+func (s *SessionRepository) DeleteSession(ctx context.Context, sessionID string) error {
+	key := fmt.Sprintf("session:%v", sessionID)
+	return s.client.Del(ctx, key).Err()
 }

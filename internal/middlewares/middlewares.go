@@ -3,7 +3,6 @@ package middlewares
 import (
 	"context"
 	"net/http"
-	"time"
 	"weather-viewer/internal/apierrors"
 	"weather-viewer/internal/services"
 )
@@ -28,18 +27,13 @@ func Auth(s *services.SessionService) Middleware {
 				return
 			}
 
-			session, err := s.GetSession(cookie.Value)
+			ctx := r.Context()
+			userID, err := s.GetUserID(ctx, cookie.Value)
 			if err != nil {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-
-			if session.IsExpired(time.Now()) {
-				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-
-			ctx := context.WithValue(r.Context(), "session", session)
+			ctx = context.WithValue(ctx, "user_id", userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

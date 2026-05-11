@@ -15,12 +15,13 @@ import (
 
 func main() {
 	database := db.InitDB()
+	redis := db.InitRedis()
 
 	srv := server.NewServer()
 
 	userRepository := repositories.NewUserRepository(database)
 	locationRepository := repositories.NewLocationRepository(database)
-	sessionRepository := repositories.NewSessionRepository(database)
+	sessionRepository := repositories.NewSessionRepository(redis)
 
 	apiKey := os.Getenv("WEATHER_API_KEY")
 	weatherClient := clients.NewWeatherClient("https://api.openweathermap.org", apiKey, http.DefaultClient)

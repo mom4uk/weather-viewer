@@ -1,10 +1,12 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"os"
 
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 )
 
 func InitDB() *sql.DB {
@@ -19,4 +21,15 @@ func InitDB() *sql.DB {
 	}
 
 	return db
+}
+
+func InitRedis() *redis.Client {
+	addr := os.Getenv("REDIS_ADDR")
+	client := redis.NewClient(&redis.Options{
+		Addr: addr,
+	})
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		panic(err)
+	}
+	return client
 }

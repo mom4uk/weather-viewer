@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"time"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/repositories"
@@ -18,17 +19,17 @@ func NewSessionService(repo *repositories.SessionRepository) *SessionService {
 	}
 }
 
-func (s *SessionService) GetSession(id string) (domain.Session, error) {
-	return s.repo.GetSession(id)
+func (s *SessionService) GetUserID(ctx context.Context, sessionToken string) (int, error) {
+	return s.repo.GetUserID(ctx, sessionToken)
 }
 
-func (s *SessionService) CreateSession(userId int) (domain.Session, error) {
+func (s *SessionService) CreateSession(ctx context.Context, userId int) (domain.Session, error) {
 	session := domain.Session{
-		ID:        uuid.New().String(),
-		UserID:    userId,
-		ExpiresAt: time.Now().Add(1 * time.Hour),
+		ID:       uuid.New().String(),
+		UserID:   userId,
+		Duration: time.Hour,
 	}
-	err := s.repo.CreateSession(session)
+	err := s.repo.CreateSession(ctx, session)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -36,6 +37,6 @@ func (s *SessionService) CreateSession(userId int) (domain.Session, error) {
 	return session, nil
 }
 
-func (s *SessionService) DeleteSession(sessionID string) error {
-	return s.repo.DeleteSession(sessionID)
+func (s *SessionService) DeleteSession(ctx context.Context, sessionID string) error {
+	return s.repo.DeleteSession(ctx, sessionID)
 }

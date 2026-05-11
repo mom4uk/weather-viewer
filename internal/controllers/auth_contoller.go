@@ -36,7 +36,8 @@ func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, user, err := c.authService.RegisterUser(login, password)
+	ctx := r.Context()
+	session, user, err := c.authService.RegisterUser(ctx, login, password)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
@@ -69,8 +70,8 @@ func (c *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
 		apierrors.HandleError(w, err)
 		return
 	}
-
-	session, err := c.authService.LoginUser(login, password)
+	ctx := r.Context()
+	session, err := c.authService.LoginUser(ctx, login, password)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
@@ -94,7 +95,8 @@ func (c *AuthController) LogoutUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// я хз, как мне правильно обрабатывать logout. Нужно ли мне обрабатывать как-то ошибки или все таки, главное,
 	// что я просто очистил куки, а очистились они в бд или она с ошибкой упала мне не важно?
-	err = c.authService.LogoutUser(cookie.Value)
+	ctx := r.Context()
+	err = c.authService.LogoutUser(ctx, cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
