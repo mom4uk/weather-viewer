@@ -18,7 +18,7 @@ func NewAuthService(sessionService *SessionService, userService *UserService) *A
 	}
 }
 
-func (s *AuthService) RegisterUser(ctx context.Context, login, password string) (domain.Session, domain.User, error) {
+func (s *AuthService) SignUp(ctx context.Context, login, password string) (domain.Session, domain.User, error) {
 	hash, err := utilities.HashPassword(password)
 	if err != nil {
 		return domain.Session{}, domain.User{}, err
@@ -35,7 +35,7 @@ func (s *AuthService) RegisterUser(ctx context.Context, login, password string) 
 	return session, user, nil
 }
 
-func (s *AuthService) LoginUser(ctx context.Context, login, password string) (domain.Session, error) {
+func (s *AuthService) SignIn(ctx context.Context, login, password string) (domain.Session, error) {
 	user, err := s.userService.GetUserByLogin(login)
 	if err != nil {
 		return domain.Session{}, domain.ErrIncorrectCredentials
@@ -52,7 +52,7 @@ func (s *AuthService) LoginUser(ctx context.Context, login, password string) (do
 	return session, nil
 }
 
-func (s *AuthService) LogoutUser(ctx context.Context, sessionID string) error {
+func (s *AuthService) SignOut(ctx context.Context, sessionID string) error {
 	err := s.sessionService.DeleteSession(ctx, sessionID)
 	if err != nil {
 		return err

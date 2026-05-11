@@ -11,18 +11,18 @@ func RegisterAuthRoutes(mux *http.ServeMux, c *AuthController) {
 		"POST /auth/register",
 		middlewares.Chain(
 			middlewares.JSON(),
-		)(http.HandlerFunc(c.RegisterUser)),
+		)(http.HandlerFunc(c.SignUp)),
 	)
 	mux.Handle(
 		"POST /auth/login",
 		middlewares.Chain(
 			middlewares.JSON(),
-		)(http.HandlerFunc(c.LoginUser)))
+		)(http.HandlerFunc(c.SignIn)))
 	mux.Handle(
 		"POST /auth/logout",
 		middlewares.Chain(
 			middlewares.JSON(),
-		)(http.HandlerFunc(c.LogoutUser)))
+		)(http.HandlerFunc(c.SignOut)))
 }
 
 func RegisterLocationRoutes(mux *http.ServeMux, c *LocationController, s *services.SessionService) {

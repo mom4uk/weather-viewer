@@ -27,7 +27,7 @@ func NewAuthController(
 	}
 }
 
-func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
 
@@ -37,7 +37,7 @@ func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	session, user, err := c.authService.RegisterUser(ctx, login, password)
+	session, user, err := c.authService.SignUp(ctx, login, password)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
@@ -62,7 +62,7 @@ func (c *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
 
@@ -71,7 +71,7 @@ func (c *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	session, err := c.authService.LoginUser(ctx, login, password)
+	session, err := c.authService.SignIn(ctx, login, password)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
@@ -87,7 +87,7 @@ func (c *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (c *AuthController) LogoutUser(w http.ResponseWriter, r *http.Request) {
+func (c *AuthController) SignOut(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
@@ -96,7 +96,7 @@ func (c *AuthController) LogoutUser(w http.ResponseWriter, r *http.Request) {
 	// я хз, как мне правильно обрабатывать logout. Нужно ли мне обрабатывать как-то ошибки или все таки, главное,
 	// что я просто очистил куки, а очистились они в бд или она с ошибкой упала мне не важно?
 	ctx := r.Context()
-	err = c.authService.LogoutUser(ctx, cookie.Value)
+	err = c.authService.SignOut(ctx, cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
