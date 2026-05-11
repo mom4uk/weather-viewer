@@ -14,13 +14,13 @@ import (
 )
 
 func main() {
-	database := db.InitDB()
+	postgres := db.InitPostgres()
 	redis := db.InitRedis()
 
 	srv := server.NewServer()
 
-	userRepository := repositories.NewUserRepository(database)
-	locationRepository := repositories.NewLocationRepository(database)
+	userRepository := repositories.NewUserRepository(postgres)
+	locationRepository := repositories.NewLocationRepository(postgres)
 	sessionRepository := repositories.NewSessionRepository(redis)
 
 	apiKey := os.Getenv("WEATHER_API_KEY")

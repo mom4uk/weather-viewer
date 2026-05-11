@@ -19,8 +19,8 @@ func NewSessionRepository(client *redis.Client) *SessionRepository {
 	}
 }
 
-func (s *SessionRepository) GetUserID(ctx context.Context, sessionToken string) (int, error) {
-	val, err := s.client.Get(ctx, sessionToken).Result()
+func (s *SessionRepository) GetUserID(ctx context.Context, sessionID string) (int, error) {
+	val, err := s.client.Get(ctx, sessionKey(sessionID)).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -34,11 +34,13 @@ func (s *SessionRepository) GetUserID(ctx context.Context, sessionToken string) 
 }
 
 func (s *SessionRepository) CreateSession(ctx context.Context, session domain.Session) error {
-	key := fmt.Sprintf("session:%v", session.ID)
-	return s.client.Set(ctx, key, session.UserID, session.Duration).Err()
+	return s.client.Set(ctx, sessionKey(session.ID), session.UserID, session.Duration).Err()
 }
 
 func (s *SessionRepository) DeleteSession(ctx context.Context, sessionID string) error {
-	key := fmt.Sprintf("session:%v", sessionID)
-	return s.client.Del(ctx, key).Err()
+	return s.client.Del(ctx, sessionKey(sessionID)).Err()
+}
+
+func sessionKey(sessionID string) string {
+	return fmt.Sprintf("session:%v", sessionID)
 }
