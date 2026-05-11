@@ -6,6 +6,13 @@ import (
 	"weather-viewer/internal/services"
 )
 
+func RegisterPageRoutes(mux *http.ServeMux, c *PageController) {
+	mux.Handle("GET /", http.HandlerFunc(c.Home))
+	mux.Handle("GET /sign-in", http.HandlerFunc(c.SignIn))
+	mux.Handle("GET /sign-up", http.HandlerFunc(c.SignUp))
+	mux.Handle("GET /error", http.HandlerFunc(c.Error))
+}
+
 func RegisterAuthRoutes(mux *http.ServeMux, c *AuthController) {
 	mux.Handle(
 		"POST /auth/register",

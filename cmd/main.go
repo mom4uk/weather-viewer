@@ -8,12 +8,16 @@ import (
 	"weather-viewer/internal/clients"
 	"weather-viewer/internal/controllers"
 	"weather-viewer/internal/middlewares"
+	"weather-viewer/internal/render"
 	"weather-viewer/internal/repositories"
 	"weather-viewer/internal/services"
 	"weather-viewer/server"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
 	postgres := db.InitPostgres()
 	redis := db.InitRedis()
 
@@ -33,9 +37,17 @@ func main() {
 
 	middlewares.Auth(sessionService)
 
+	renderer, _ := render.NewTemplateRenderer("templates/*.html")
+
+	pageController := controllers.NewPageController(
+		renderer,
+		locationService,
+		sessionService,
+	)
 	userController := controllers.NewAuthController(userService, sessionService, authService)
 	locationController := controllers.NewLocationController(locationService)
 
+	controllers.RegisterPageRoutes(srv.GetMux(), pageController)
 	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 

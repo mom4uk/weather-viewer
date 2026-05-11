@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -12,6 +13,7 @@ import (
 func InitPostgres() *sql.DB {
 	dsl := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", dsl)
+	log.Println("DATABASE_URL =", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
