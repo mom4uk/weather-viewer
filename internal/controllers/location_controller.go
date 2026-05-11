@@ -21,6 +21,7 @@ func NewLocationController(s *services.LocationService) *LocationController {
 }
 
 func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request) {
+	// тут надо user_id достать и проверять, что я не могу с другого юзера почекать локации?
 	idStr := r.PathValue("id")
 	if err := dto.ValidateId(idStr); err != nil {
 		apierrors.HandleError(w, err)
@@ -103,14 +104,13 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request) {
-	val := r.Context().Value("session")
-	session, ok := val.(domain.Session)
+	userID, ok := r.Context().Value("user_id").(int)
 	if !ok {
 		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	result, err := c.locationService.GetLocations(session.UserID)
+	result, err := c.locationService.GetLocations(userID)
 	if err != nil {
 		apierrors.HandleError(w, err)
 		return
