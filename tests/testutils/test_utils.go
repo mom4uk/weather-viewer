@@ -24,11 +24,9 @@ func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Rea
 	req, err := http.NewRequest(method, path, body)
 	require.NoError(t, err)
 
-	const SessionCookieName = "session_token"
-	req.AddCookie(&http.Cookie{
-		Name:  SessionCookieName,
-		Value: sessionToken,
-	})
+	if sessionToken != "" {
+		req.Header.Set("Cookie", "session_token="+sessionToken)
+	}
 
 	if body != nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -40,13 +38,11 @@ func PerformRequest(t *testing.T, app *TestApp, method, path string, body io.Rea
 	return rr
 }
 
-// тут похоже проблема с архитектурой. Из-за того, что я передаю в NewLocationService() weatherClient, я вынужден
-// либо кидать его в каждый SetupTests, либо подменять на FakeWeatherClient. Мне кажется это не правильно.
 func SetupTests(t *testing.T) (*TestApp, *TestDB) {
 	db := NewTestDB()
 	app := NewTestApp(db)
 
-	err := TruncateAll(db.DB)
+	err := TruncateAll(db.Postgres)
 	require.NoError(t, err, "truncate error")
 	return app, db
 }
@@ -55,7 +51,7 @@ func SetupTestWithWeather(t *testing.T, weatherClient interfaces.Weather) (*Test
 	db := NewTestDB()
 	app := NewTestAppForWeather(db, weatherClient)
 
-	err := TruncateAll(db.DB)
+	err := TruncateAll(db.Postgres)
 	require.NoError(t, err, "truncate error")
 	return app, db
 }

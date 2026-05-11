@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"database/sql"
 	"net/http"
 	"os"
 	"weather-viewer/internal/clients"
@@ -9,20 +10,23 @@ import (
 	"weather-viewer/internal/repositories"
 	"weather-viewer/internal/services"
 	"weather-viewer/server"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type TestApp struct {
-	DB            *TestDB
+	Postgres      *sql.DB
 	Server        *server.Server
+	Redis         *redis.Client
 	WeatherClient interfaces.Weather
 }
 
 func NewTestApp(db *TestDB) *TestApp {
 	srv := server.NewServer()
 
-	locationRepository := repositories.NewLocationRepository(db.DB)
-	sessionRepository := repositories.NewSessionRepository(db.DB)
-	userRepository := repositories.NewUserRepository(db.DB)
+	locationRepository := repositories.NewLocationRepository(db.Postgres)
+	sessionRepository := repositories.NewSessionRepository(db.Redis)
+	userRepository := repositories.NewUserRepository(db.Postgres)
 
 	apiKey := os.Getenv("WEATHER_API_KEY")
 	weatherClient := clients.NewWeatherClient("https://api.openweathermap.org", apiKey, http.DefaultClient)
@@ -38,17 +42,18 @@ func NewTestApp(db *TestDB) *TestApp {
 	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 	return &TestApp{
-		DB:     db,
-		Server: srv,
+		Postgres: db.Postgres,
+		Redis:    db.Redis,
+		Server:   srv,
 	}
 }
 
 func NewTestAppForWeather(db *TestDB, weatherClient interfaces.Weather) *TestApp {
 	srv := server.NewServer()
 
-	locationRepository := repositories.NewLocationRepository(db.DB)
-	sessionRepository := repositories.NewSessionRepository(db.DB)
-	userRepository := repositories.NewUserRepository(db.DB)
+	locationRepository := repositories.NewLocationRepository(db.Postgres)
+	sessionRepository := repositories.NewSessionRepository(db.Redis)
+	userRepository := repositories.NewUserRepository(db.Postgres)
 
 	userService := services.NewUserService(userRepository)
 	locationService := services.NewLocationService(locationRepository, weatherClient)
@@ -61,7 +66,8 @@ func NewTestAppForWeather(db *TestDB, weatherClient interfaces.Weather) *TestApp
 	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
 	controllers.RegisterLocationRoutes(srv.GetMux(), locationController, sessionService)
 	return &TestApp{
-		DB:     db,
-		Server: srv,
+		Postgres: db.Postgres,
+		Redis:    db.Redis,
+		Server:   srv,
 	}
 }
