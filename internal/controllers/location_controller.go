@@ -53,8 +53,8 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request) {
-	val := r.Context().Value("session")
-	session, ok := val.(domain.Session)
+	userID, ok := r.Context().Value("user_id").(int)
+
 	if !ok {
 		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -79,7 +79,7 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 
 	result, err := c.locationService.AddLocation(domain.Location{
 		Name:      r.FormValue("name"),
-		UserID:    session.UserID,
+		UserID:    userID,
 		Latitude:  lat,
 		Longitude: lon,
 	})
