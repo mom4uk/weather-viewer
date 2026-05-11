@@ -43,12 +43,6 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-
-	res := dto.UserResponse{
-		Login: user.Login,
-	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    session.ID,
@@ -56,6 +50,17 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false,
 	})
+
+	if wantsHTML(r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	res := dto.UserResponse{
+		Login: user.Login,
+	}
 
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		apierrors.WriteError(w, "Ошибка при формировании json", http.StatusInternalServerError)
@@ -77,7 +82,6 @@ func (c *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    session.ID,
@@ -85,11 +89,22 @@ func (c *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false,
 	})
+
+	if wantsHTML(r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *AuthController) SignOut(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
+		if wantsHTML(r) {
+			http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+			return
+		}
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -98,10 +113,13 @@ func (c *AuthController) SignOut(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	err = c.authService.SignOut(ctx, cookie.Value)
 	if err != nil {
+		if wantsHTML(r) {
+			http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+			return
+		}
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:   "session_token",
@@ -109,4 +127,15 @@ func (c *AuthController) SignOut(w http.ResponseWriter, r *http.Request) {
 		Path:   "/",
 		MaxAge: -1,
 	})
+
+	if wantsHTML(r) {
+		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func wantsHTML(r *http.Request) bool {
+	return strings.Contains(r.Header.Get("Accept"), "text/html")
 }

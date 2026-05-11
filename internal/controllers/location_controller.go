@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"weather-viewer/internal/apierrors"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
@@ -89,6 +90,11 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if strings.Contains(r.Header.Get("Accept"), "text/html") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 
 	response := dto.LocationResponse{
@@ -145,6 +151,12 @@ func (c *LocationController) RemoveLocation(w http.ResponseWriter, r *http.Reque
 		apierrors.HandleError(w, err)
 		return
 	}
+
+	if strings.Contains(r.Header.Get("Accept"), "text/html") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	w.WriteHeader(http.StatusNoContent)
 
 	if err := json.NewEncoder(w).Encode(nil); err != nil {
