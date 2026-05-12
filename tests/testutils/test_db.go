@@ -40,13 +40,15 @@ func NewTestPostgres() *sql.DB {
 }
 
 func NewTestRedis() *redis.Client {
-	addr := os.Getenv("REDIS_ADDR")
+	addr := os.Getenv("REDIS_URL")
 	if addr == "" {
-		panic("REDIS_ADDR environment variable not set")
+		panic("REDIS_URL environment variable not set")
 	}
-	client := redis.NewClient(&redis.Options{
-		Addr: addr,
-	})
+	opt, err := redis.ParseURL(addr)
+	if err != nil {
+		panic(err)
+	}
+	client := redis.NewClient(opt)
 	if err := client.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
