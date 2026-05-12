@@ -23,53 +23,6 @@ jobs:
       - name: Run lint
         run: golangci-lint run
 
-  migrate:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=10
-
-    env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.26.1"
-
-      - name: Install migrate (with postgres driver)
-        run: |
-          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
-
-      - name: Wait for Postgres
-        run: |
-          until pg_isready -h localhost -U postgres; do
-            echo "waiting postgres..."
-            sleep 1
-          done
-
-      - name: Run migrations
-        run: |
-          migrate -path=db/migrations \
-            -database "$DATABASE_URL" \
-            -verbose up
-
   test:
     runs-on: ubuntu-latest
 
@@ -98,8 +51,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -107,14 +59,26 @@ jobs:
           go-version: "1.26.1"
           cache: true
 
-      - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
+      - name: Install migrate
+        run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Add Go bin to PATH
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -U postgres; do
+            sleep 1
+          done
+
+      - name: Run migrations
+        run: |
+          migrate -path=db/migrations \
+            -database "$DATABASE_URL" \
+            -verbose up
+
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
 
       - name: Run tests
         run: make tests
