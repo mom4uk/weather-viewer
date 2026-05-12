@@ -6,6 +6,10 @@ stages:
 variables:
   DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
   REDIS_URL: redis://redis:6379
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
 lint:
   image: golangci/golangci-lint:latest
   stage: lint
@@ -17,20 +21,14 @@ lint:
 migrate:
   image: migrate/migrate:v4.17.0
   stage: migrate
+
   services:
     - name: postgres:14
       alias: postgres
-      variables:
-        POSTGRES_DB: postgres
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-  variables:
-    MIGRATIONS_PATH: "/builds/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/db/migrations"
-  before_script:
-    - apk add --no-cache bash postgresql-client
-    - until pg_isready -h postgres -p 5432 -U postgres; do echo "Ждем Postgres..."; sleep 1; done
+
   script:
-    - migrate -path "$MIGRATIONS_PATH" -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" -verbose up
+    - until pg_isready -h postgres -U postgres; do sleep 1; done
+    - migrate -path=db/migrations -database="$DATABASE_URL" -verbose up
 
 test:
   image: golang:1.26
