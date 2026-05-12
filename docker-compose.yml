@@ -1,4 +1,16 @@
 services:
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:14
     ports:
