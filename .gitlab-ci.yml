@@ -1,10 +1,28 @@
 stages:
   - lint
+  - migrate
   - test
 
 variables:
   DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
   REDIS_URL: redis://redis:6379
+lint:
+  image: golangci/golangci-lint:latest
+  stage: lint
+
+  script:
+    - go mod download
+    - make lint
+
+migrate:
+  image: migrate/migrate:v4.17.0
+  stage: migrate
+  services:
+    - postgres:14
+  variables:
+    DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+  script:
+    - migrate -path db/migrations -database "$DATABASE_URL" up
 
 test:
   image: golang:1.26
@@ -23,13 +41,4 @@ test:
 
   script:
     - go mod download
-    - make migrate
     - make tests
-
-lint:
-  image: golangci/golangci-lint:latest
-  stage: lint
-
-  script:
-    - go mod download
-    - make lint
