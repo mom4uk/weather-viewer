@@ -15,7 +15,7 @@ lint:
     - make lint
 
 migrate:
-  image: alpine:3.18
+  image: migrate/migrate:v4.17.0
   stage: migrate
   services:
     - name: postgres:14
@@ -24,14 +24,13 @@ migrate:
         POSTGRES_DB: postgres
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
+  variables:
+    MIGRATIONS_PATH: "/builds/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/db/migrations"
   before_script:
-    - apk add --no-cache bash postgresql-client docker
+    - apk add --no-cache bash postgresql-client
     - until pg_isready -h postgres -p 5432 -U postgres; do echo "Ждем Postgres..."; sleep 1; done
   script:
-    - docker run --rm -v "$CI_PROJECT_DIR/db/migrations:/migrations" migrate/migrate:v4.17.0 \
-      -path=/migrations \
-      -database="postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" \
-      -verbose up
+    - migrate -path "$MIGRATIONS_PATH" -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" -verbose up
 
 test:
   image: golang:1.26
