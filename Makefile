@@ -13,8 +13,6 @@ prod:
 		up -d --build
 
 tests:
-	@DATABASE_URL=$$DATABASE_URL \
-	REDIS_URL=$$REDIS_URL \
 	gotestsum ./tests/...
 
 start:
