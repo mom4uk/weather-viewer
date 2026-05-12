@@ -26,11 +26,8 @@ migrate:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
 
-  variables:
-    DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
-
   script:
-    - migrate -path db/migrations -database "$DATABASE_URL" up
+    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up -verbose
 
 test:
   image: golang:1.26
