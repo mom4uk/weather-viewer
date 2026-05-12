@@ -18,7 +18,7 @@ jobs:
           go-version: "1.26.1"
 
       - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
       - name: Run lint
         run: golangci-lint run
@@ -47,9 +47,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.1"
 
-      - run: |
+      - name: Install migrate
+        run: go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -U postgres; do
+            sleep 1
+          done
+
+      - name: Run migrations
+        run: |
           migrate -path=db/migrations \
             -database "$DATABASE_URL" \
             -verbose up
