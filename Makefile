@@ -2,8 +2,17 @@
 include .env
 export
 
+dev:
+	docker compose \
+      -f docker-compose.yml \
+      -f docker-compose.dev.yml \
+      up -d
+
+prod:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
 tests:
-	source .env && gotestsum --format=short-verbose ./tests/...
+	gotestsum --format=short-verbose ./tests/...
 
 start:
 	go run cmd/main.go
