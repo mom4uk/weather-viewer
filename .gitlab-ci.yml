@@ -1,0 +1,34 @@
+stages:
+  - lint
+  - test
+
+variables:
+  DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+  REDIS_URL: redis://redis:6379
+
+test:
+  image: golang:1.26
+  stage: test
+
+  services:
+    - name: postgres:14
+      alias: postgres
+      variables:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+
+    - name: redis:7-alpine
+      alias: redis
+
+  script:
+    - go mod download
+    - make tests
+
+lint:
+  image: golang:1.26
+  stage: lint
+
+  script:
+    - go mod download
+    - make lint
