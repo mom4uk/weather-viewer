@@ -27,7 +27,7 @@ migrate:
         POSTGRES_PASSWORD: postgres
 
   script:
-    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up -verbose
+    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" -verbose up
 
 test:
   image: golang:1.26
