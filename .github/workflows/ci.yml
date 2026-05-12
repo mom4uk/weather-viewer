@@ -15,15 +15,13 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.26"
+          go-version: "1.26.1"
 
-      - name: Install dependencies
-        run: go mod download
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
+      - name: Run lint
+        run: golangci-lint run
 
   migrate:
     runs-on: ubuntu-latest
@@ -44,18 +42,15 @@ jobs:
           --health-retries=10
 
     env:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run migrations
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}/db/migrations:/migrations \
-            migrate/migrate:v4.17.0 \
-            -path=/migrations \
+      - run: go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+      - run: |
+          migrate -path=db/migrations \
             -database "$DATABASE_URL" \
             -verbose up
 
