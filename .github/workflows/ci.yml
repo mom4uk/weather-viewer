@@ -52,15 +52,15 @@ jobs:
         with:
           go-version: "1.26.1"
 
-      - name: Install migrate
-        run: go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
-      - name: Add Go bin to PATH
-        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+      - name: Install migrate (with postgres driver)
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Wait for Postgres
         run: |
           until pg_isready -h localhost -U postgres; do
+            echo "waiting postgres..."
             sleep 1
           done
 
