@@ -19,12 +19,8 @@ migrate:
   stage: migrate
   services:
     - postgres:14
-  variables:
-    DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
   script:
-    - echo "DATABASE_URL=$DATABASE_URL"
-    - env | grep DATABASE
-    - migrate -path db/migrations -database "$DATABASE_URL" up
+    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up
 
 test:
   image: golang:1.26
