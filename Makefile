@@ -1,6 +1,4 @@
 .PHONY: tests
-include .env
-export
 
 dev:
 	docker compose \
@@ -9,10 +7,15 @@ dev:
       up -d
 
 prod:
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+	docker compose \
+		-f docker-compose.yml \
+		-f docker-compose.prod.yml \
+		up -d --build
 
 tests:
-	gotestsum --format=short-verbose ./tests/...
+	@DATABASE_URL=$$DATABASE_URL \
+	REDIS_URL=$$REDIS_URL \
+	gotestsum ./tests/...
 
 start:
 	go run cmd/main.go
@@ -27,3 +30,6 @@ migrate:
 create-migration:
 	migrate create -ext sql -dir db/migrations $(name)
 
+tests-local:
+	set -a && source .env && set +a && \
+	gotestsum ./tests/...
