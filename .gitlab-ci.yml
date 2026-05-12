@@ -26,7 +26,7 @@ test:
     - make tests
 
 lint:
-  image: golang:1.26
+  image: golangci/golangci-lint:v1.60
   stage: lint
 
   script:
