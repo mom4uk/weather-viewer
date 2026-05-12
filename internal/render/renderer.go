@@ -3,25 +3,28 @@ package render
 import (
 	"html/template"
 	"net/http"
+	"weather-viewer/templates"
 )
 
 type TemplateRenderer struct {
 	templates *template.Template
 }
 
-func NewTemplateRenderer(pattern string) (*TemplateRenderer, error) {
+func NewTemplateRenderer() (*TemplateRenderer, error) {
 	funcs := template.FuncMap{
 		"weatherIcon":        weatherIcon,
 		"weatherDescription": weatherDescription,
 		"temperatureC":       temperatureC,
 	}
 
-	templates, err := template.New("").Funcs(funcs).ParseGlob(pattern)
+	tmpl, err := template.New("").
+		Funcs(funcs).
+		ParseFS(templates.FS, "*.html")
 	if err != nil {
 		return nil, err
 	}
 
-	return &TemplateRenderer{templates: templates}, nil
+	return &TemplateRenderer{templates: tmpl}, nil
 }
 
 func (r *TemplateRenderer) Render(w http.ResponseWriter, name string, data any) {
