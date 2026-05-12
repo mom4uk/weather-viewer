@@ -22,6 +22,7 @@ migrate:
   variables:
     DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
   script:
+    - echo "$DATABASE_URL"
     - migrate -path db/migrations -database "$DATABASE_URL" up
 
 test:
