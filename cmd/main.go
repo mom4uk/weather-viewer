@@ -12,12 +12,9 @@ import (
 	"weather-viewer/internal/repositories"
 	"weather-viewer/internal/services"
 	"weather-viewer/server"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	godotenv.Load()
 	postgres := db.InitPostgres()
 	redis := db.InitRedis()
 
@@ -38,7 +35,7 @@ func main() {
 
 	middlewares.Auth(sessionService)
 
-	renderer, err := render.NewTemplateRenderer("templates/*.html")
+	renderer, err := render.NewTemplateRenderer()
 	if err != nil {
 		log.Fatal(err)
 	}
