@@ -36,7 +36,8 @@ func Auth(s *services.SessionService) Middleware {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			ctx = context.WithValue(ctx, "user_id", userID)
+			type userIDKey struct{}
+			ctx = context.WithValue(ctx, userIDKey{}, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

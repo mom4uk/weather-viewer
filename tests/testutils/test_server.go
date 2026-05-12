@@ -27,7 +27,6 @@ func NewErrorServer(status int) *httptest.Server {
 			if err != nil {
 				panic(err)
 			}
-			break
 		case "Санкт-Петербург":
 			sbpWeather, err := os.ReadFile("../../tests/fixtures/spb_weather_fixture.json")
 			if err != nil {
@@ -41,7 +40,6 @@ func NewErrorServer(status int) *httptest.Server {
 			if err != nil {
 				panic(err)
 			}
-			break
 		default:
 			_, err := fmt.Fprintf(w, `На эту локацию нет стаба %s`, location)
 			if err != nil {

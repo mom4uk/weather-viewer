@@ -2,11 +2,9 @@ package unit
 
 import (
 	"weather-viewer/internal/domain"
-	"weather-viewer/internal/interfaces"
 )
 
 type FakeRepository struct {
-	locationRepository interfaces.LocationRepository
 }
 
 func NewFakeRepository() *FakeRepository {
