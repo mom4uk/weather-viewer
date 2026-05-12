@@ -27,7 +27,9 @@ migrate:
         POSTGRES_PASSWORD: postgres
 
   script:
-    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" -verbose up
+    - apk add --no-cache bash postgresql-client
+    - until pg_isready -h postgres -p 5432 -U postgres; do echo "Ждем Postgres..."; sleep 1; done
+    - /migrate -path /builds/$CI_PROJECT_PATH/db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" -verbose up
 
 test:
   image: golang:1.26
