@@ -20,7 +20,11 @@ migrate:
   services:
     - postgres:14
   script:
-    - migrate -path db/migrations -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up
+    - |
+      migrate \
+        -path db/migrations \
+        -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" \
+        up
 
 test:
   image: golang:1.26
