@@ -31,3 +31,6 @@ create-migration:
 tests-local:
 	set -a && source .env && set +a && \
 	gotestsum ./tests/...
+
+lint-fix:
+	golangci-lint run --fix
