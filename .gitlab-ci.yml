@@ -23,6 +23,7 @@ test:
 
   script:
     - go mod download
+    - make migrate
     - make tests
 
 lint:
