@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"weather-viewer/internal/apierrors"
+	"weather-viewer/internal/contextkeys"
 	"weather-viewer/internal/services"
 )
 
@@ -36,8 +37,8 @@ func Auth(s *services.SessionService) Middleware {
 				apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			type userIDKey struct{}
-			ctx = context.WithValue(ctx, userIDKey{}, userID)
+
+			ctx = context.WithValue(ctx, contextkeys.UserID, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

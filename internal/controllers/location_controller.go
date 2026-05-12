@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"weather-viewer/internal/apierrors"
+	"weather-viewer/internal/contextkeys"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
 	"weather-viewer/internal/services"
@@ -55,7 +56,7 @@ func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("user_id").(int)
+	userID, ok := r.Context().Value(contextkeys.UserID).(int)
 
 	if !ok {
 		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
@@ -110,7 +111,7 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *LocationController) GetLocations(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("user_id").(int)
+	userID, ok := r.Context().Value(contextkeys.UserID).(int)
 	if !ok {
 		apierrors.WriteError(w, "Unauthorized", http.StatusUnauthorized)
 		return
