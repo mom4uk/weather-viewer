@@ -17,14 +17,20 @@ lint:
 migrate:
   image: migrate/migrate:v4.17.0
   stage: migrate
+
   services:
-    - postgres:14
+    - name: postgres:14
+      alias: postgres
+      variables:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+
+  variables:
+    DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+
   script:
-    - |
-      migrate \
-        -path db/migrations \
-        -database "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" \
-        up
+    - migrate -path db/migrations -database "$DATABASE_URL" up
 
 test:
   image: golang:1.26
