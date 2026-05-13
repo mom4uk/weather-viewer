@@ -33,6 +33,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
+          command_timeout: 10m
           script: |
             cd /opt/weather-viewer
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
