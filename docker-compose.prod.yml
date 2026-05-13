@@ -1,8 +1,12 @@
 services:
   application:
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
+    image: ghcr.io/mom4uk/weather-viewer:latest
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
 
   postgres:
     restart: always
