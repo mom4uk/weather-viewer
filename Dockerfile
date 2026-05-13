@@ -16,10 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /app/app /app
 
-RUN ls -la .
-
-RUN pwd
-
 EXPOSE 8000
 
 CMD ["./app"]
