@@ -82,3 +82,15 @@ jobs:
 
       - name: Run tests
         run: make tests
+
+      - name: Download Code Climate reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+
+      - name: Upload coverage to Code Climate
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          ./cc-test-reporter format-coverage -t gocov coverage.out
+          ./cc-test-reporter upload-coverage
