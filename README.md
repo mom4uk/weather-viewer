@@ -16,6 +16,8 @@ git clone git@github.com:mom4uk/weather-viewer.git
 
 cd weather-viewer
 
+заполнить .env файл
+
 make dev
 
 make migrate
