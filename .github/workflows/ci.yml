@@ -80,17 +80,11 @@ jobs:
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
 
-      - name: Run tests
-        run: make tests
+      - name: Run tests with coverage
+        run: go test ./... -coverprofile=coverage.out
 
-      - name: Download Code Climate reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-
-      - name: Upload coverage to Code Climate
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        run: |
-          ./cc-test-reporter format-coverage -t gocov coverage.out
-          ./cc-test-reporter upload-coverage
+      - name: Upload coverage to Qlty
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          token: ${{ secrets.CC_TEST_REPORTER_ID }}
+          files: coverage.out
