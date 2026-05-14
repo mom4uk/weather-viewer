@@ -82,9 +82,9 @@ jobs:
 
       - name: Run tests with coverage
         run: go test ./... -coverprofile=coverage.out
-
       - name: Upload coverage to Qlty
         uses: qltysh/qlty-action/coverage@v2
         with:
           token: ${{ secrets.CC_TEST_REPORTER_ID }}
           files: coverage.out
+          strip-prefix: weather-viewer/
