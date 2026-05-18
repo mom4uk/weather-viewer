@@ -1,9 +1,13 @@
 services:
   application:
-    image: golang:1.26
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     working_dir: /app
     env_file:
       - .env
+    ports:
+      - "8080:8080"
     volumes:
       - .:/app
     command: go run ./cmd/main.go

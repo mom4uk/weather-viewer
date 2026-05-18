@@ -1,0 +1,16 @@
+FROM golang:1.26.1
+
+WORKDIR /app
+
+ENV PATH="/go/bin:${PATH}"
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+RUN go install gotest.tools/gotestsum@latest
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+COPY . .
+
+CMD ["go", "run", "./cmd/main.go"]
