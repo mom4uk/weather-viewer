@@ -23,7 +23,7 @@ func TestRegistration_success(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/auth/register",
-		strings.NewReader("login=loginLength20simbols&password=passwLength20simbols"),
+		strings.NewReader("login=loginLength20simbols&password=passwLength20simbols&confirm_password=passwLength20simbols"),
 		"",
 	)
 
@@ -64,7 +64,7 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/auth/register",
-		strings.NewReader("login=  loginLength20simbols   &password=6chars"),
+		strings.NewReader("login=  loginLength20simbols   &password=6chars&confirm_password=6chars"),
 		"",
 	)
 
@@ -101,17 +101,17 @@ func TestRegistration_success_loginWithSpaces(t *testing.T) {
 func TestRegistration_error_invalidLogin(t *testing.T) {
 	app, _ := testutils.SetupTests(t)
 
-	loginInvalidLengthMessage := "Длина логина должен быть от 6 до 20 символов"
+	loginInvalidLengthMessage := "Длина логина должна быть от 6 до 20 символов"
 	invalidLoginMessage := "Логин может состоять только из латинских букв и цифр"
 	testData := []struct {
 		name    string
 		login   string
 		message string
 	}{
-		{"Dots are not allowed", "login=testTest.&password=password", invalidLoginMessage},
-		{"Special chars are not allowed", "login=2*()_-?!test&password=password", invalidLoginMessage},
-		{"Login over 20 simbols are not allowed", "login=loginLength21simbolss&password=password", loginInvalidLengthMessage},
-		{"Login less than 6 simbols are not allowed", "login=less&password=password", loginInvalidLengthMessage},
+		{"Dots are not allowed", "login=testTest.&password=password&confirm_password=password", invalidLoginMessage},
+		{"Special chars are not allowed", "login=2*()_-?!test&password=password&confirm_password=password", invalidLoginMessage},
+		{"Login over 20 simbols are not allowed", "login=loginLength21simbolss&password=password&confirm_password=password", loginInvalidLengthMessage},
+		{"Login less than 6 simbols are not allowed", "login=less&password=password&confirm_password=password", loginInvalidLengthMessage},
 	}
 
 	for _, tt := range testData {
@@ -150,7 +150,7 @@ func TestRegistration_error_nonUniqueLogin(t *testing.T) {
 		app,
 		http.MethodPost,
 		"/auth/register",
-		strings.NewReader("login=test1234&password=password"),
+		strings.NewReader("login=test1234&password=password&confirm_password=password"),
 		"",
 	)
 
@@ -176,8 +176,16 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 		message string
 	}{
 
-		{"Password over 20 simbols are not allowed", "login=test1111&password=passwoLength21simbols", errorMessage},
-		{"Password less than 6 simbols are not allowed", "login=test1111&password=5char", errorMessage},
+		{
+			"Password over 20 simbols are not allowed",
+			"login=test1111&password=passwoLength21simbols&confirm_password=passwoLength21simbols",
+			errorMessage,
+		},
+		{
+			"Password less than 6 simbols are not allowed",
+			"login=test1111&password=5char&confirm_password=5char",
+			errorMessage,
+		},
 	}
 
 	for _, tt := range testData {
@@ -206,7 +214,8 @@ func TestRegistration_error_invalidPassword(t *testing.T) {
 
 func TestRegistration_error_absenceOfFields(t *testing.T) {
 	app, _ := testutils.SetupTests(t)
-	errorMessage := "Не передан логин и/или пароль"
+	abcenceOfLoginOrPasswordMsg := "Не передан логин и/или пароль"
+	abcenceOfPasswordConfirmationMsg := "Пароли не совпадают"
 
 	testData := []struct {
 		name    string
@@ -214,11 +223,12 @@ func TestRegistration_error_absenceOfFields(t *testing.T) {
 		message string
 	}{
 
-		{"Absence of login and password is not allowed", "", errorMessage},
-		{"Empty password is not allowed", "login=test1234&password=", errorMessage},
-		{"Empty login is not allowed", "login=&password=test1234", errorMessage},
-		{"Absence of password is not allowed", "login=loginLength20simbols", errorMessage},
-		{"Absence of login is not allowed", "password=loginLength20simbols", errorMessage},
+		{"Absence of login and password is not allowed", "", abcenceOfLoginOrPasswordMsg},
+		{"Empty password is not allowed", "login=test1234&password=&confirm_password=", abcenceOfLoginOrPasswordMsg},
+		{"Empty login is not allowed", "login=&password=test1234&confirm_password=test1234", abcenceOfLoginOrPasswordMsg},
+		{"Absence of password is not allowed", "login=loginLength20simbols", abcenceOfLoginOrPasswordMsg},
+		{"Absence of login is not allowed", "password=loginLength20simbols&confirm_password=loginLength20simbols", abcenceOfLoginOrPasswordMsg},
+		{"Absence of password confirmation is not allowed", "login=loginLength20simbols&password=loginLength20simbols", abcenceOfPasswordConfirmationMsg},
 	}
 
 	for _, tt := range testData {
