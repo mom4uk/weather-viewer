@@ -27,5 +27,5 @@ make migrate
 Для запуска тестов выполнить:
 
 ```
-make test-local
+make compose-test
 ```
