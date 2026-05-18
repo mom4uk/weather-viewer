@@ -27,9 +27,8 @@ migrate:
 create-migration:
 	migrate create -ext sql -dir db/migrations $(name)
 
-tests-local:
-	set -a && source .env && set +a && \
-	gotestsum --format=short-verbose ./tests/...
+compose-tests:
+	docker compose exec application go test ./tests/... -v
 
 lint-fix:
 	golangci-lint run --fix
