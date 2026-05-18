@@ -33,13 +33,13 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	password := strings.TrimSpace(r.FormValue("password"))
 	confirmPassword := strings.TrimSpace(r.FormValue("confirm_password"))
 
-	if password != confirmPassword {
-		apierrors.HandleError(w, domain.ErrPasswordsNotMatch)
+	if err := dto.ValidateCredentials(login, password); err != nil {
+		apierrors.HandleError(w, err)
 		return
 	}
 
-	if err := dto.ValidateCredentials(login, password); err != nil {
-		apierrors.HandleError(w, err)
+	if password != confirmPassword {
+		apierrors.HandleError(w, domain.ErrPasswordsNotMatch)
 		return
 	}
 
