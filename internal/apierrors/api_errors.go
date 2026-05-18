@@ -41,7 +41,7 @@ func HandleError(w http.ResponseWriter, err error) {
 		WriteError(w, "Пользователь не найден", http.StatusNotFound)
 		return
 	case errors.Is(err, domain.ErrLoginInvalidLength):
-		WriteError(w, "Длина логина должен быть от 6 до 20 символов", http.StatusUnprocessableEntity)
+		WriteError(w, "Длина логина должна быть от 6 до 20 символов", http.StatusUnprocessableEntity)
 		return
 	case errors.Is(err, domain.ErrPasswordInvalidLength):
 		WriteError(w, "Длина пароля должна быть от 6 до 20 символов", http.StatusUnprocessableEntity)
@@ -57,6 +57,9 @@ func HandleError(w http.ResponseWriter, err error) {
 		return
 	case errors.Is(err, domain.ErrIncorrectCredentials):
 		WriteError(w, "Неверный логин или пароль", http.StatusUnauthorized)
+		return
+	case errors.Is(err, domain.ErrPasswordsNotMatch):
+		WriteError(w, "Пароли не совпадают", http.StatusBadRequest)
 		return
 	case errors.As(err, &weatherErr):
 		WriteError(w, weatherErr.Message, http.StatusBadGateway)

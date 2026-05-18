@@ -30,4 +30,5 @@ var (
 	ErrInvalidLogin          = errors.New("invalid login")
 	ErrUserAlreadyExists     = errors.New("user already exists")
 	ErrAbsenceOfLoginPass    = errors.New("absence of login / password")
+	ErrPasswordsNotMatch     = errors.New("passwords do not match")
 )

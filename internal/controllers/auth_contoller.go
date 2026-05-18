@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"weather-viewer/internal/apierrors"
+	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
 	"weather-viewer/internal/services"
 )
@@ -30,6 +31,12 @@ func NewAuthController(
 func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
+	confirmPassword := strings.TrimSpace(r.FormValue("confirm_password"))
+
+	if password != confirmPassword {
+		apierrors.HandleError(w, domain.ErrPasswordsNotMatch)
+		return
+	}
 
 	if err := dto.ValidateCredentials(login, password); err != nil {
 		apierrors.HandleError(w, err)
