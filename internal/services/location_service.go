@@ -22,7 +22,7 @@ func (s *LocationService) GetLocation(id int) (domain.Location, error) {
 	if err != nil {
 		return domain.Location{}, err
 	}
-	weather, err := s.WeatherClient.GetWeather(location)
+	weather, err := s.GetWeather(location)
 	if err != nil {
 		return domain.Location{}, err
 	}
@@ -36,13 +36,17 @@ func (s *LocationService) AddLocation(location domain.Location) (domain.Location
 	return s.LocationRepository.AddLocation(location)
 }
 
+func (s *LocationService) GetWeather(location domain.Location) (domain.Weather, error) {
+	return s.WeatherClient.GetWeather(location)
+}
+
 func (s *LocationService) GetLocations(userID int) ([]domain.Location, error) {
 	locations, err := s.LocationRepository.GetLocations(userID)
 	if err != nil {
 		return []domain.Location{}, err
 	}
 	for i := range locations {
-		weather, err := s.WeatherClient.GetWeather(locations[i])
+		weather, err := s.GetWeather(locations[i])
 		if err != nil {
 			return []domain.Location{}, err
 		}

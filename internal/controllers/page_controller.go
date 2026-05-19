@@ -14,7 +14,8 @@ type PageController struct {
 }
 
 type HomePageData struct {
-	Locations []domain.Location
+	Locations     []domain.Location
+	LocationError string
 }
 
 func NewPageController(
@@ -48,7 +49,10 @@ func (c *PageController) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.renderer.Render(w, "index.html", HomePageData{Locations: locations})
+	c.renderer.Render(w, "index.html", HomePageData{
+		Locations:     locations,
+		LocationError: r.URL.Query().Get("location_error"),
+	})
 }
 
 func (c *PageController) SignIn(w http.ResponseWriter, _ *http.Request) {

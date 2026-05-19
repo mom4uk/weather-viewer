@@ -3,8 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
-	"strings"
 	"weather-viewer/internal/apierrors"
 	"weather-viewer/internal/contextkeys"
 	"weather-viewer/internal/domain"
@@ -23,7 +23,6 @@ func NewLocationController(s *services.LocationService) *LocationController {
 }
 
 func (c *LocationController) GetLocation(w http.ResponseWriter, r *http.Request) {
-	// тут надо user_id достать и проверять, что я не могу с другого юзера почекать локации?
 	idStr := r.PathValue("id")
 	if err := dto.ValidateId(idStr); err != nil {
 		apierrors.HandleError(w, err)
@@ -80,18 +79,38 @@ func (c *LocationController) AddLocation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	result, err := c.locationService.AddLocation(domain.Location{
+	location := domain.Location{
 		Name:      r.FormValue("name"),
 		UserID:    userID,
 		Latitude:  lat,
 		Longitude: lon,
-	})
+	}
+
+	if wantsHTML(r) {
+		weather, err := c.locationService.GetWeather(location)
+		if err != nil {
+			message, _ := apierrors.Response(err)
+			http.Redirect(w, r, "/?location_error="+url.QueryEscape(message), http.StatusSeeOther)
+			return
+		}
+
+		location.Latitude = weather.Coord.Lat
+		location.Longitude = weather.Coord.Lon
+	}
+
+	result, err := c.locationService.AddLocation(location)
 	if err != nil {
+		if wantsHTML(r) {
+			message, _ := apierrors.Response(err)
+			http.Redirect(w, r, "/?location_error="+url.QueryEscape(message), http.StatusSeeOther)
+			return
+		}
+
 		apierrors.HandleError(w, err)
 		return
 	}
 
-	if strings.Contains(r.Header.Get("Accept"), "text/html") {
+	if wantsHTML(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -153,7 +172,7 @@ func (c *LocationController) RemoveLocation(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if strings.Contains(r.Header.Get("Accept"), "text/html") {
+	if wantsHTML(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

@@ -24,6 +24,12 @@
 
 <section id="page-content">
     <div class="container mt-4">
+        {{if .LocationError}}
+        <div class="alert alert-danger" role="alert">
+            {{.LocationError}}
+        </div>
+        {{end}}
+
         <form action="/addLocation" method="post" class="d-flex my-4">
             <div class="input-group location-search-input-group me-3">
                 <input class="form-control" type="text" name="name" placeholder="Enter location" required>
@@ -45,6 +51,12 @@
                         <form action="/removeLocation/{{.ID}}" method="post" class="position-absolute weather-card-delete-form">
                             <button class="btn-close" aria-label="Delete" type="submit"></button>
                         </form>
+                        {{if .WeatherError}}
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <h3 class="card-title">{{.Name}}</h3>
+                            <p class="card-text text-muted">{{.WeatherError}}</p>
+                        </div>
+                        {{else}}
                         <img class="card-img-top img-fluid" src="{{weatherIcon .Weather}}" alt="Weather icon">
                         <div class="card-body d-flex flex-column">
                             <h1 class="card-text">{{temperatureC .Weather.Main.Temp}}°C</h1>
@@ -54,6 +66,7 @@
                             </p>
                             <p class="card-text mb-1">Humidity: {{.Weather.Main.Humidity}}%</p>
                         </div>
+                        {{end}}
                     </div>
                 </div>
                 {{else}}

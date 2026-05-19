@@ -22,7 +22,9 @@ func (repo *FakeRepository) AddLocation(location domain.Location) (domain.Locati
 }
 
 func (repo *FakeRepository) GetLocations(sessionToken int) ([]domain.Location, error) {
-	return []domain.Location{}, nil
+	return []domain.Location{
+		{ID: 1, Name: "Москва", UserID: 1, Latitude: 0, Longitude: 0},
+	}, nil
 }
 
 func (repo *FakeRepository) RemoveLocation(id int) error {
