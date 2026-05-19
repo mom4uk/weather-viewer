@@ -7,6 +7,7 @@ import (
 	"weather-viewer/internal/clients"
 	"weather-viewer/internal/controllers"
 	"weather-viewer/internal/interfaces"
+	"weather-viewer/internal/render"
 	"weather-viewer/internal/repositories"
 	"weather-viewer/internal/services"
 	"weather-viewer/server"
@@ -35,8 +36,12 @@ func NewTestApp(db *TestDB) *TestApp {
 	locationService := services.NewLocationService(locationRepository, weatherClient)
 	sessionService := services.NewSessionService(sessionRepository)
 	authService := services.NewAuthService(sessionService, userService)
+	renderer, err := render.NewTemplateRenderer()
+	if err != nil {
+		panic(err)
+	}
 
-	userController := controllers.NewAuthController(userService, sessionService, authService)
+	userController := controllers.NewAuthController(userService, sessionService, authService, renderer)
 	locationController := controllers.NewLocationController(locationService)
 
 	controllers.RegisterAuthRoutes(srv.GetMux(), userController)
@@ -59,8 +64,12 @@ func NewTestAppForWeather(db *TestDB, weatherClient interfaces.Weather) *TestApp
 	locationService := services.NewLocationService(locationRepository, weatherClient)
 	sessionService := services.NewSessionService(sessionRepository)
 	authService := services.NewAuthService(sessionService, userService)
+	renderer, err := render.NewTemplateRenderer()
+	if err != nil {
+		panic(err)
+	}
 
-	userController := controllers.NewAuthController(userService, sessionService, authService)
+	userController := controllers.NewAuthController(userService, sessionService, authService, renderer)
 	locationController := controllers.NewLocationController(locationService)
 
 	controllers.RegisterAuthRoutes(srv.GetMux(), userController)

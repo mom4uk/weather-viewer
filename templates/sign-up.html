@@ -17,12 +17,22 @@
 
     <h2 class="text-center mb-5">Sign Up</h2>
 
+    {{if .Error}}
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-4 col-md-6 col-sm-12">
+            <div class="alert alert-danger" role="alert">
+                {{.Error}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+
     <div class="row justify-content-center">
         <div class="col-12 col-lg-4 col-md-6 col-sm-12">
             <form action="/auth/register" method="post" class="mt-4">
                 <div class="mb-3">
                     <label for="login" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="login" name="login" required value=""/>
+                    <input type="text" class="form-control" id="login" name="login" required value="{{.Login}}"/>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
@@ -30,7 +40,14 @@
                 </div>
                 <div class="mb-3">
                     <label for="repeat-password" class="form-label">Repeat password</label>
+                    {{if .RepeatPasswordError}}
+                    <input type="password" class="form-control is-invalid" id="repeat-password" name="repeat_password" required value=""/>
+                    <div class="invalid-feedback">
+                        {{.RepeatPasswordError}}
+                    </div>
+                    {{else}}
                     <input type="password" class="form-control" id="repeat-password" name="repeat_password" required value=""/>
+                    {{end}}
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100 mt-3">Sign Up</button>

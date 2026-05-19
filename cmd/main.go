@@ -45,7 +45,7 @@ func main() {
 		locationService,
 		sessionService,
 	)
-	userController := controllers.NewAuthController(userService, sessionService, authService)
+	userController := controllers.NewAuthController(userService, sessionService, authService, renderer)
 	locationController := controllers.NewLocationController(locationService)
 
 	controllers.RegisterPageRoutes(srv.GetMux(), pageController)

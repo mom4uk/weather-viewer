@@ -7,6 +7,7 @@ import (
 	"weather-viewer/internal/apierrors"
 	"weather-viewer/internal/domain"
 	"weather-viewer/internal/dto"
+	"weather-viewer/internal/render"
 	"weather-viewer/internal/services"
 )
 
@@ -14,31 +15,56 @@ type AuthController struct {
 	userService    *services.UserService
 	sessionService *services.SessionService
 	authService    *services.AuthService
+	renderer       *render.TemplateRenderer
+}
+
+type SignUpPageData struct {
+	Login               string
+	Error               string
+	RepeatPasswordError string
 }
 
 func NewAuthController(
 	userService *services.UserService,
 	sessionService *services.SessionService,
 	authService *services.AuthService,
+	renderer *render.TemplateRenderer,
 ) *AuthController {
 	return &AuthController{
 		userService:    userService,
 		sessionService: sessionService,
 		authService:    authService,
+		renderer:       renderer,
 	}
 }
 
 func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	login := strings.TrimSpace(r.FormValue("login"))
 	password := strings.TrimSpace(r.FormValue("password"))
-	confirmPassword := strings.TrimSpace(r.FormValue("confirm_password"))
+	confirmPassword := confirmationPassword(r)
 
 	if err := dto.ValidateCredentials(login, password); err != nil {
+		if c.shouldRenderSignUp(r) {
+			c.renderer.Render(w, "sign-up.html", SignUpPageData{
+				Login: login,
+				Error: err.Error(),
+			})
+			return
+		}
+
 		apierrors.HandleError(w, err)
 		return
 	}
 
 	if password != confirmPassword {
+		if c.shouldRenderSignUp(r) {
+			c.renderer.Render(w, "sign-up.html", SignUpPageData{
+				Login:               login,
+				RepeatPasswordError: "Passwords don't match",
+			})
+			return
+		}
+
 		apierrors.HandleError(w, domain.ErrPasswordsNotMatch)
 		return
 	}
@@ -46,6 +72,14 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	session, user, err := c.authService.SignUp(ctx, login, password)
 	if err != nil {
+		if c.shouldRenderSignUp(r) {
+			c.renderer.Render(w, "sign-up.html", SignUpPageData{
+				Login: login,
+				Error: err.Error(),
+			})
+			return
+		}
+
 		apierrors.HandleError(w, err)
 		return
 	}
@@ -145,4 +179,16 @@ func (c *AuthController) SignOut(w http.ResponseWriter, r *http.Request) {
 
 func wantsHTML(r *http.Request) bool {
 	return strings.Contains(r.Header.Get("Accept"), "text/html")
+}
+
+func (c *AuthController) shouldRenderSignUp(r *http.Request) bool {
+	return c.renderer != nil && wantsHTML(r)
+}
+
+func confirmationPassword(r *http.Request) string {
+	if value := strings.TrimSpace(r.FormValue("confirm_password")); value != "" {
+		return value
+	}
+
+	return strings.TrimSpace(r.FormValue("repeat_password"))
 }
