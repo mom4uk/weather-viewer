@@ -27,6 +27,8 @@ migrate:
 	migrate -path db/migrations -database "$$DATABASE_URL" up
 
 compose-migrate:
+	docker compose exec postgres \
+		sh -lc 'until pg_isready -U postgres -d postgres; do sleep 1; done'
 	docker compose exec application \
 		sh -lc '/go/bin/migrate -path db/migrations -database "$$DATABASE_URL" up'
 
