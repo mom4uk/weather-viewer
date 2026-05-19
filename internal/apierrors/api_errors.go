@@ -16,56 +16,45 @@ func WriteError(w http.ResponseWriter, message string, code int) {
 	})
 }
 
-func HandleError(w http.ResponseWriter, err error) {
+func Response(err error) (string, int) {
 	var weatherErr domain.WeatherAPIError
 	switch {
 	case errors.Is(err, domain.ErrInvalidId):
-		WriteError(w, "Некорректное значение в id", http.StatusBadRequest)
-		return
+		return "Некорректное значение в id", http.StatusBadRequest
 	case errors.Is(err, domain.ErrLocationNotFound):
-		WriteError(w, "Данная локация не найдена", http.StatusNotFound)
-		return
+		return "Данная локация не найдена", http.StatusNotFound
 	case errors.Is(err, domain.ErrInvalidName):
-		WriteError(w, "Некорректное значение в name", http.StatusBadRequest)
-		return
+		return "Некорректное значение в name", http.StatusBadRequest
 	case errors.Is(err, domain.ErrInvalidLatitude):
-		WriteError(w, "Некорректное значение в latitude", http.StatusBadRequest)
-		return
+		return "Некорректное значение в latitude", http.StatusBadRequest
 	case errors.Is(err, domain.ErrInvalidLongitude):
-		WriteError(w, "Некорректное значение в longitude", http.StatusBadRequest)
-		return
+		return "Некорректное значение в longitude", http.StatusBadRequest
 	case errors.Is(err, domain.ErrLocationAlreadyExists):
-		WriteError(w, "Такая локация уже существует", http.StatusConflict)
-		return
+		return "Такая локация уже существует", http.StatusConflict
 	case errors.Is(err, domain.ErrUserNotFound):
-		WriteError(w, "Пользователь не найден", http.StatusNotFound)
-		return
+		return "Пользователь не найден", http.StatusNotFound
 	case errors.Is(err, domain.ErrLoginInvalidLength):
-		WriteError(w, "Длина логина должна быть от 6 до 20 символов", http.StatusUnprocessableEntity)
-		return
+		return "Длина логина должна быть от 6 до 20 символов", http.StatusUnprocessableEntity
 	case errors.Is(err, domain.ErrPasswordInvalidLength):
-		WriteError(w, "Длина пароля должна быть от 6 до 20 символов", http.StatusUnprocessableEntity)
-		return
+		return "Длина пароля должна быть от 6 до 20 символов", http.StatusUnprocessableEntity
 	case errors.Is(err, domain.ErrInvalidLogin):
-		WriteError(w, "Логин может состоять только из латинских букв и цифр", http.StatusUnprocessableEntity)
-		return
+		return "Логин может состоять только из латинских букв и цифр", http.StatusUnprocessableEntity
 	case errors.Is(err, domain.ErrUserAlreadyExists):
-		WriteError(w, "Пользователь с таким логином уже существует", http.StatusConflict)
-		return
+		return "Пользователь с таким логином уже существует", http.StatusConflict
 	case errors.Is(err, domain.ErrAbsenceOfLoginPass):
-		WriteError(w, "Не передан логин и/или пароль", http.StatusBadRequest)
-		return
+		return "Не передан логин и/или пароль", http.StatusBadRequest
 	case errors.Is(err, domain.ErrIncorrectCredentials):
-		WriteError(w, "Неверный логин или пароль", http.StatusUnauthorized)
-		return
+		return "Неверный логин или пароль", http.StatusUnauthorized
 	case errors.Is(err, domain.ErrPasswordsNotMatch):
-		WriteError(w, "Пароли не совпадают", http.StatusBadRequest)
-		return
+		return "Пароли не совпадают", http.StatusBadRequest
 	case errors.As(err, &weatherErr):
-		WriteError(w, weatherErr.Message, http.StatusBadGateway)
-		return
+		return weatherErr.Message, http.StatusBadGateway
 	default:
-		WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err.Error(), http.StatusInternalServerError
 	}
+}
+
+func HandleError(w http.ResponseWriter, err error) {
+	message, code := Response(err)
+	WriteError(w, message, code)
 }

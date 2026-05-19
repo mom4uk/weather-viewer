@@ -45,9 +45,10 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err := dto.ValidateCredentials(login, password); err != nil {
 		if c.shouldRenderSignUp(r) {
+			message, _ := apierrors.Response(err)
 			c.renderer.Render(w, "sign-up.html", SignUpPageData{
 				Login: login,
-				Error: err.Error(),
+				Error: message,
 			})
 			return
 		}
@@ -58,9 +59,10 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if password != confirmPassword {
 		if c.shouldRenderSignUp(r) {
+			message, _ := apierrors.Response(domain.ErrPasswordsNotMatch)
 			c.renderer.Render(w, "sign-up.html", SignUpPageData{
 				Login:               login,
-				RepeatPasswordError: "Passwords don't match",
+				RepeatPasswordError: message,
 			})
 			return
 		}
@@ -73,9 +75,10 @@ func (c *AuthController) SignUp(w http.ResponseWriter, r *http.Request) {
 	session, user, err := c.authService.SignUp(ctx, login, password)
 	if err != nil {
 		if c.shouldRenderSignUp(r) {
+			message, _ := apierrors.Response(err)
 			c.renderer.Render(w, "sign-up.html", SignUpPageData{
 				Login: login,
-				Error: err.Error(),
+				Error: message,
 			})
 			return
 		}
