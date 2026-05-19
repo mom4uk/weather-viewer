@@ -24,6 +24,11 @@ type SignUpPageData struct {
 	RepeatPasswordError string
 }
 
+type SignInPageData struct {
+	Login string
+	Error string
+}
+
 func NewAuthController(
 	userService *services.UserService,
 	sessionService *services.SessionService,
@@ -116,12 +121,30 @@ func (c *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 	password := strings.TrimSpace(r.FormValue("password"))
 
 	if err := dto.ValidateCredentials(login, password); err != nil {
+		if c.shouldRenderSignIn(r) {
+			message, _ := apierrors.Response(err)
+			c.renderer.Render(w, "sign-in.html", SignInPageData{
+				Login: login,
+				Error: message,
+			})
+			return
+		}
+
 		apierrors.HandleError(w, err)
 		return
 	}
 	ctx := r.Context()
 	session, err := c.authService.SignIn(ctx, login, password)
 	if err != nil {
+		if c.shouldRenderSignIn(r) {
+			message, _ := apierrors.Response(err)
+			c.renderer.Render(w, "sign-in.html", SignInPageData{
+				Login: login,
+				Error: message,
+			})
+			return
+		}
+
 		apierrors.HandleError(w, err)
 		return
 	}
@@ -185,6 +208,10 @@ func wantsHTML(r *http.Request) bool {
 }
 
 func (c *AuthController) shouldRenderSignUp(r *http.Request) bool {
+	return c.renderer != nil && wantsHTML(r)
+}
+
+func (c *AuthController) shouldRenderSignIn(r *http.Request) bool {
 	return c.renderer != nil && wantsHTML(r)
 }
 

@@ -52,7 +52,7 @@ func (c *PageController) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PageController) SignIn(w http.ResponseWriter, _ *http.Request) {
-	c.renderer.Render(w, "sign-in.html", nil)
+	c.renderer.Render(w, "sign-in.html", SignInPageData{})
 }
 
 func (c *PageController) SignUp(w http.ResponseWriter, _ *http.Request) {
