@@ -22,7 +22,6 @@ var (
 	ErrInvalidLatitude       = errors.New("invalid latitude for location")
 	ErrInvalidLongitude      = errors.New("invalid longitude for location")
 	ErrLocationAlreadyExists = errors.New("location already exists")
-	ErrSessionNotFound       = errors.New("session not found")
 	ErrUserNotFound          = errors.New("user not found")
 	ErrIncorrectCredentials  = errors.New("incorrect login or password")
 	ErrLoginInvalidLength    = errors.New("login length is invalid")
